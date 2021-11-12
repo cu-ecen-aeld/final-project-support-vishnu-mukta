@@ -1,30 +1,24 @@
-INCLUDE_DIRS = 
-LIB_DIRS = 
-CC=$(CROSS_COMPILE)gcc
+ifeq ($(CC),)
+	CC = $(CROSS_COMPILE)gcc
+endif
 
-CDEFS=
-CFLAGS= -O0 -g $(INCLUDE_DIRS) $(CDEFS)
-LIBS= -lrt
+ifeq ($(CFLAGS),)
+	CFLAGS = -g -Wall -Werror 
+endif
 
-HFILES= 
-CFILES= capture.c
+ifeq ($(LDFLAGS),)
+	LDFLAGS = -pthread -lrt
+endif
 
-SRCS= ${HFILES} ${CFILES}
-OBJS= ${CFILES:.c=.o}
+all: capture.o capture
 
-all:	capture
+default: capture.o capture
+
+capture.o : capture.c
+	$(CC) $(CFLAGS) -c -o capture.o capture.c $(INCLUDES)
+
+capture : capture.o
+	$(CC) $(CFLAGS) capture.o -o capture $(INCLUDES) $(LDFLAGS)
 
 clean:
-	-rm -f *.o *.d *.ppm *.pgm
-	-rm -f capture
-
-distclean:
-	-rm -f *.o *.d
-
-capture: ${OBJS}
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $@.o $(LIBS)
-
-depend:
-
-.c.o:
-	$(CC) $(CFLAGS) -c $<
+	-rm -f *.o *.elf *.map
