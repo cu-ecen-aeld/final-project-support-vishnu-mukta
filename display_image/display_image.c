@@ -14,7 +14,7 @@ int main(void) {
 
     printf("Entering program...\n");
 
-    lcd_spi_fd = open("/dev/spi0.0", O_RDWR);
+    lcd_spi_fd = open("/dev/spidev0.0", O_RDWR);
     if (lcd_spi_fd == -1) {
         perror("open");
         return 1;
