@@ -55,8 +55,8 @@ int main(void) {
     printf("Init LCD complete...\n");
 
     printf("Drawing pixel...\n");
-    for (j = 0; j < 40; i++) {
-        for (i = 0; i < 240; j++) {
+    for (j = 0; j < 40; j++) {
+        for (i = 0; i < 240; i++) {
             LCD_SetAddress(x, y);
             LCD_WritePixel(color);
 
