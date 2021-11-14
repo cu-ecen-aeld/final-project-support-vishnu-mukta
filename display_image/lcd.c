@@ -37,15 +37,33 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep (150000);
-
-    if(LCD_SendCommandByte(ILI9341_SWRESET)) {
-        printf("Error in LCD_SendCommandByte()\n");
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
         return 1;
     }
 
     usleep (150000);
 
+
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
+    if(LCD_SendCommandByte(ILI9341_SWRESET)) {
+        printf("Error in LCD_SendCommandByte()\n");
+        return 1;
+    }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
+
+    usleep (150000);
+
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(0xEF)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -62,7 +80,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(0xCF)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -79,7 +105,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(0xED)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -100,7 +134,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(0xE8)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -117,7 +159,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(0xCB)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -142,7 +192,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(0xF7)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -151,7 +209,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(0xEA)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -164,7 +230,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_PWCTR1)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -173,7 +247,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_PWCTR2)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -182,7 +264,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_VMCTR1)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -195,7 +285,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_VMCTR2)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -204,7 +302,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_MADCTL)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -213,7 +319,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_VSCRSADD)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -222,7 +336,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_PIXFMT)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -231,7 +353,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_FRMCTR1)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -244,7 +374,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_DFUNCTR)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -261,7 +399,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(0xF2)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -270,7 +416,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_GAMMASET)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -279,7 +433,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_GMCTRP1)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -344,7 +506,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_GMCTRN1)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -409,7 +579,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_SLPOUT)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -418,7 +596,17 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
 
+    usleep(150000);
+
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_DISPON)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
@@ -427,11 +615,12 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150000);
 
     return 0;
 }

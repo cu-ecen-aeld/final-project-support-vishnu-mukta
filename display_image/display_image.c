@@ -16,7 +16,6 @@
 #include "lcd.h"
 
 int main(void) {
-    uint8_t test_array[2] = { 0x83, 0x87 };
     printf("Entering program...\n");
 
     //Init LCD module
@@ -25,30 +24,8 @@ int main(void) {
         return 1;
     }
 
-    //Test LCD module
-    if (CS_Ctrl(GPIO_LOW)) {
-        printf("Error in CS_Ctrl()\n");
-        return 1;
-    }
+    printf("Init LCD complete...\n");
 
-    if(LCD_SendCommandByte(LCD_DUMMY_CMD)) {
-        printf("We gotta problem in LCD_SendCommandByte()\n");
-    }
-
-    if(LCD_SendDataByte(test_array[0])) {
-        printf("We gotta problem in LCD_SendDataByte()\n");
-    }
-
-    if(LCD_SendDataByte(test_array[1])) {
-        printf("We gotta problem in LCD_SendDataByte()\n");
-    }
-
-    if (CS_Ctrl(GPIO_HIGH)) {
-        printf("Error in CS_Ctrl()\n");
-        return 1;
-    }
-
-    printf("Check Logic Analyzer Output\n");
 
     //DeInit LCD module
     if (LCD_DeInit()) {
