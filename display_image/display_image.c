@@ -45,7 +45,7 @@ int main(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if (CS_Ctrl(GPIO_LOW)) {
+    if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
