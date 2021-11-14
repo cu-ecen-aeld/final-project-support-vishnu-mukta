@@ -39,6 +39,23 @@ int main(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+    if(LCD_SendCommandByte(ILI9341_MADCTL)) {
+        printf("Error in LCD_SendCommandByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte(MADCTL_MX | MADCTL_BGR)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
+
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
     if(LCD_SendCommandByte(ILI9341_CASET)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
