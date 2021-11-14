@@ -54,84 +54,8 @@ int main(void) {
     printf("Init LCD complete...\n");
 
     printf("Drawing pixel...");
-    if (CS_Ctrl(GPIO_LOW)) {
-        printf("Error in CS_Ctrl()\n");
-        return 1;
-    }
-    if(LCD_SendCommandByte(ILI9341_CASET)) {
-        printf("Error in LCD_SendCommandByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)(x >> 8))) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)x)) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)(x >> 8))) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)x)) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if (CS_Ctrl(GPIO_HIGH)) {
-        printf("Error in CS_Ctrl()\n");
-        return 1;
-    }
-
-    if (CS_Ctrl(GPIO_LOW)) {
-        printf("Error in CS_Ctrl()\n");
-        return 1;
-    }
-    if(LCD_SendCommandByte(ILI9341_PASET)) {
-        printf("Error in LCD_SendCommandByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)(y >> 8))) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)y)) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)(y >> 8))) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)y)) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if (CS_Ctrl(GPIO_HIGH)) {
-        printf("Error in CS_Ctrl()\n");
-        return 1;
-    }
-
-    if (CS_Ctrl(GPIO_LOW)) {
-        printf("Error in CS_Ctrl()\n");
-        return 1;
-    }
-    if(LCD_SendCommandByte(ILI9341_RAMWR)) {
-        printf("Error in LCD_SendCommandByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)(color >> 8))) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if(LCD_SendDataByte((uint8_t)color)) {
-        printf("Error in LCD_SendDataByte()\n");
-        return 1;
-    }
-    if (CS_Ctrl(GPIO_HIGH)) {
-        printf("Error in CS_Ctrl()\n");
-        return 1;
-    }
+    LCD_SetAddress(x, y);
+    LCD_WritePixel(color);
 
 
     //DeInit LCD module
