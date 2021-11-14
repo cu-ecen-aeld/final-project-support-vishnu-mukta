@@ -15,12 +15,38 @@
 #include "gpio.h"
 #include "lcd.h"
 
+
+#define MADCTL_MY 0x80  ///< Bottom to top
+#define MADCTL_MX 0x40  ///< Right to left
+#define MADCTL_MV 0x20  ///< Reverse Mode
+#define MADCTL_ML 0x10  ///< LCD refresh Bottom to top
+#define MADCTL_RGB 0x00 ///< Red-Green-Blue pixel order
+#define MADCTL_BGR 0x08 ///< Blue-Green-Red pixel order
+#define MADCTL_MH 0x04  ///< LCD refresh right to left
+
 int main(void) {
     printf("Entering program...\n");
 
     //Init LCD module
     if (LCD_Init()) {
         printf("Error in LCD_Init()\n");
+        return 1;
+    }
+
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
+    if(LCD_SendCommandByte(ILI9341_MADCTL)) {
+        printf("Error in LCD_SendCommandByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte(MADCTL_MX | MADCTL_BGR)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
         return 1;
     }
 
