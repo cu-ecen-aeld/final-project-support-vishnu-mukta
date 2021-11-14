@@ -31,12 +31,16 @@ int main(void) {
         return 1;
     }
 
-    if(LCD_WriteCommand(LCD_DUMMY_CMD)) {
-        printf("We gotta problem in LCD_WriteCommand()\n");
+    if(LCD_SendCommandByte(LCD_DUMMY_CMD)) {
+        printf("We gotta problem in LCD_SendCommandByte()\n");
     }
 
-    if(LCD_WriteData(test_array, 2)) {
-        printf("We gotta problem in LCD_WriteData()\n");
+    if(LCD_SendDataByte(test_array[0])) {
+        printf("We gotta problem in LCD_SendDataByte()\n");
+    }
+
+    if(LCD_SendDataByte(test_array[1])) {
+        printf("We gotta problem in LCD_SendDataByte()\n");
     }
 
     if (CS_Ctrl(GPIO_HIGH)) {
