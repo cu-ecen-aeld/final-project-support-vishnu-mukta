@@ -30,7 +30,7 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(50000);
+    usleep(50);
     
     if (RST_Ctrl(GPIO_HIGH)) {
         printf("Error in RST_Ctrl()\n");
@@ -42,7 +42,7 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep (150000);
+    usleep(150);
 
 
     if (CS_Ctrl(GPIO_LOW)) {
@@ -58,7 +58,7 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep (150000);
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -85,6 +85,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -109,6 +111,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -139,6 +143,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -163,6 +169,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -197,6 +205,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -213,6 +223,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -235,6 +247,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -252,6 +266,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -268,6 +284,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -290,6 +308,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -306,6 +326,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -324,6 +346,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -341,6 +365,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -357,6 +383,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -378,6 +406,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -403,6 +433,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -437,6 +469,8 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
+
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -511,6 +545,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -584,6 +620,8 @@ int LCD_Init(void) {
         return 1;
     }
 
+    usleep(150);
+
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -601,7 +639,7 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150000);
+    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -620,7 +658,7 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150000);
+    usleep(150);
 
     return 0;
 }
