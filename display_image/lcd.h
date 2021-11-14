@@ -67,7 +67,7 @@
 int LCD_Init(void);
 int LCD_SendCommandByte(uint8_t command);
 int LCD_SendDataByte(uint8_t data);
-int LCD_SetAddress(uint16_t x, uint16_t y);
+int LCD_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 int LCD_WritePixel(uint16_t color);
 int LCD_DeInit(void);
 

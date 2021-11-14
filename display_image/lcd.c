@@ -692,7 +692,7 @@ int LCD_SendDataByte(uint8_t data) {
 }
 
 
-int LCD_SetAddress(uint16_t x, uint16_t y) {
+int LCD_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -701,19 +701,19 @@ int LCD_SetAddress(uint16_t x, uint16_t y) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)(x >> 8))) {
+    if(LCD_SendDataByte((uint8_t)(x1 >> 8))) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)x)) {
+    if(LCD_SendDataByte((uint8_t)x1)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)(x >> 8))) {
+    if(LCD_SendDataByte((uint8_t)(x2 >> 8))) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)x)) {
+    if(LCD_SendDataByte((uint8_t)x2)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
@@ -730,19 +730,19 @@ int LCD_SetAddress(uint16_t x, uint16_t y) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)(y >> 8))) {
+    if(LCD_SendDataByte((uint8_t)(y1 >> 8))) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)y)) {
+    if(LCD_SendDataByte((uint8_t)y1)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)(y >> 8))) {
+    if(LCD_SendDataByte((uint8_t)(y2 >> 8))) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)y)) {
+    if(LCD_SendDataByte((uint8_t)y2)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }

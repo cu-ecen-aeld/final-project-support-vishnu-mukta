@@ -39,12 +39,48 @@ int main(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
-    if(LCD_SendCommandByte(ILI9341_MADCTL)) {
+    if(LCD_SendCommandByte(ILI9341_CASET)) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(MADCTL_MX | MADCTL_BGR)) {
+    if(LCD_SendDataByte((uint8_t)(0 >> 8))) {
         printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)0)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)(239 >> 8))) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)239)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendCommandByte(ILI9341_PASET)) {
+        printf("Error in LCD_SendCommandByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)(0 >> 8))) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)0)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)(319 >> 8))) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)319)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendCommandByte(ILI9341_RAMWR)) {
+        printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
     if (CS_Ctrl(GPIO_HIGH)) {
@@ -57,7 +93,7 @@ int main(void) {
     printf("Drawing pixel...\n");
     for (j = 0; j < 40; j++) {
         for (i = 0; i < 240; i++) {
-            LCD_SetAddress(x, y);
+            LCD_SetAddress(x, y, x, y);
             LCD_WritePixel(color);
 
         }
