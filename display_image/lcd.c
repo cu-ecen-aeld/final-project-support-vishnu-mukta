@@ -8,6 +8,16 @@
 #include "gpio.h"
 #include "spi.h"
 
+
+#define MADCTL_MY 0x80  ///< Bottom to top
+#define MADCTL_MX 0x40  ///< Right to left
+#define MADCTL_MV 0x20  ///< Reverse Mode
+#define MADCTL_ML 0x10  ///< LCD refresh Bottom to top
+#define MADCTL_RGB 0x00 ///< Red-Green-Blue pixel order
+#define MADCTL_BGR 0x08 ///< Blue-Green-Red pixel order
+#define MADCTL_MH 0x04  ///< LCD refresh right to left
+
+
 int LCD_Init(void) {
     if (GPIO_Init()) {
         printf("Error in GPIO_Init()\n");
@@ -72,10 +82,11 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x80)) {
+    if(LCD_SendDataByte(0x00)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if(LCD_SendDataByte(0x02)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -84,8 +95,6 @@ int LCD_Init(void) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
-
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -99,10 +108,11 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0xC1)) {
+    if(LCD_SendDataByte(0x41)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if(LCD_SendDataByte(0x30)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -112,7 +122,6 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -134,16 +143,16 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x81)) {
+    if(LCD_SendDataByte(0x01)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -153,10 +162,11 @@ int LCD_Init(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x85)) {
+    if(LCD_SendDataByte(0x05)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if(LCD_SendDataByte(0x00)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -170,7 +180,6 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -205,7 +214,6 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -224,7 +232,6 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -247,7 +254,6 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -266,7 +272,6 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -285,7 +290,6 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -308,7 +312,6 @@ int LCD_Init(void) {
         return 1;
     }
 
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -318,16 +321,15 @@ int LCD_Init(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x86)) {
+    if(LCD_SendDataByte(0x06)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
     }
-
-    usleep(150);
 
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
@@ -421,10 +423,11 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x82)) {
+    if(LCD_SendDataByte(0x02)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if(LCD_SendDataByte(0x27)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -508,10 +511,11 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0xF1)) {
+    if(LCD_SendDataByte(0x71)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if(LCD_SendDataByte(0x37)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -583,10 +587,11 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0xC1)) {
+    if(LCD_SendDataByte(0x41)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if(LCD_SendDataByte(0x48)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -630,10 +635,11 @@ int LCD_Init(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x80)) {
+    if(LCD_SendDataByte(0x00)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -649,10 +655,11 @@ int LCD_Init(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x80)) {
+    if(LCD_SendDataByte(0x00)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
+    usleep(150);
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -692,7 +699,29 @@ int LCD_SendDataByte(uint8_t data) {
 }
 
 
-int LCD_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+int LCD_SetOrientation(void) {
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
+    if(LCD_SendCommandByte(ILI9341_MADCTL)) {
+        printf("Error in LCD_SendCommandByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte(MADCTL_MX | MADCTL_BGR)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+
+int LCD_SetBorders(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
     if (CS_Ctrl(GPIO_LOW)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -705,8 +734,20 @@ int LCD_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)x1)) {
+    if(LCD_SendDataByte((uint8_t)y1)) {
         printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)(y1 >> 8))) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)x2)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendCommandByte(ILI9341_PASET)) {
+        printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
     if(LCD_SendDataByte((uint8_t)(x2 >> 8))) {
@@ -714,6 +755,52 @@ int LCD_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
         return 1;
     }
     if(LCD_SendDataByte((uint8_t)x2)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)(y2 >> 8))) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)y2)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendCommandByte(ILI9341_RAMWR)) {
+        printf("Error in LCD_SendCommandByte()\n");
+        return 1;
+    }
+    if (CS_Ctrl(GPIO_HIGH)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+
+int LCD_SetAddress(uint16_t x, uint16_t y) {
+    if (CS_Ctrl(GPIO_LOW)) {
+        printf("Error in CS_Ctrl()\n");
+        return 1;
+    }
+    if(LCD_SendCommandByte(ILI9341_CASET)) {
+        printf("Error in LCD_SendCommandByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)(x >> 8))) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)x)) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)(x >> 8))) {
+        printf("Error in LCD_SendDataByte()\n");
+        return 1;
+    }
+    if(LCD_SendDataByte((uint8_t)x)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
@@ -730,19 +817,19 @@ int LCD_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)(y1 >> 8))) {
+    if(LCD_SendDataByte((uint8_t)(y >> 8))) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)y1)) {
+    if(LCD_SendDataByte((uint8_t)y)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)(y2 >> 8))) {
+    if(LCD_SendDataByte((uint8_t)(y >> 8))) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte((uint8_t)y2)) {
+    if(LCD_SendDataByte((uint8_t)y)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
