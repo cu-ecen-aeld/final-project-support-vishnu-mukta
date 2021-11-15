@@ -12,6 +12,7 @@
 #include <linux/spi/spidev.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <signal.h>
 #include "gpio.h"
 #include "lcd.h"
 
@@ -24,10 +25,45 @@
 #define MADCTL_BGR 0x08 ///< Blue-Green-Red pixel order
 #define MADCTL_MH 0x04  ///< LCD refresh right to left
 
+int continue_program = 1;
+sigset_t sig_mask;
+
+void sig_handler(int signo) {
+    if ((signo == SIGINT) || (signo == SIGTERM)) {     
+        continue_program = 0;
+    }
+}
+
 int main(void) {
     uint16_t color = 0xFFE0;
     int i, j;
     printf("Entering program...\n");
+
+        // Set up signal handling
+    if (signal(SIGINT, sig_handler) == SIG_ERR) {
+        perror("signal");
+        exit(EXIT_FAILURE);
+    }
+
+    if (signal(SIGTERM, sig_handler) == SIG_ERR) {
+        perror("signal");
+        exit(EXIT_FAILURE);
+    }
+
+    if (sigemptyset(&sig_mask) == -1) {
+        perror("sigemptyset");
+        exit(EXIT_FAILURE);
+    }
+
+    if (sigaddset(&sig_mask, SIGTERM) == -1) {
+        perror("sigaddset");
+        exit(EXIT_FAILURE);
+    }
+
+    if (sigaddset(&sig_mask, SIGINT) == -1) {
+        perror("sigaddset");
+        exit(EXIT_FAILURE);
+    }
 
     //Init LCD module
     if (LCD_Init()) {
@@ -115,6 +151,8 @@ int main(void) {
 
         }
     }
+
+    while (continue_program);
 
 
     //DeInit LCD module
