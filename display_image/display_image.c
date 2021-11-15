@@ -26,7 +26,6 @@
 #define MADCTL_MH 0x04  ///< LCD refresh right to left
 
 int continue_program = 1;
-sigset_t sig_mask;
 
 void sig_handler(int signo) {
     if ((signo == SIGINT) || (signo == SIGTERM)) {     
@@ -47,21 +46,6 @@ int main(void) {
 
     if (signal(SIGTERM, sig_handler) == SIG_ERR) {
         perror("signal");
-        exit(EXIT_FAILURE);
-    }
-
-    if (sigemptyset(&sig_mask) == -1) {
-        perror("sigemptyset");
-        exit(EXIT_FAILURE);
-    }
-
-    if (sigaddset(&sig_mask, SIGTERM) == -1) {
-        perror("sigaddset");
-        exit(EXIT_FAILURE);
-    }
-
-    if (sigaddset(&sig_mask, SIGINT) == -1) {
-        perror("sigaddset");
         exit(EXIT_FAILURE);
     }
 
