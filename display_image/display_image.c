@@ -25,7 +25,7 @@
 #define MADCTL_MH 0x04  ///< LCD refresh right to left
 
 int main(void) {
-    uint16_t x = 12, y = 19, color = 0xFFE0;
+    uint16_t color = 0xFFE0;
     int i, j;
     printf("Entering program...\n");
 
@@ -110,7 +110,7 @@ int main(void) {
     printf("Drawing pixel...\n");
     for (j = 0; j < 40; j++) {
         for (i = 0; i < 240; i++) {
-            LCD_SetAddress(x, y, x, y);
+            LCD_SetAddress(i, j, i, j);
             LCD_WritePixel(color);
 
         }
