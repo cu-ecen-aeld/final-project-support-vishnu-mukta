@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # script for capturing image and compressing it
 # Author: Mukta Darekar
 
