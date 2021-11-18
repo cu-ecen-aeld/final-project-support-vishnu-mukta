@@ -26,6 +26,11 @@ int main(int argc, char* argv[]) {
     struct addrinfo hints;
     struct addrinfo* res;
 
+    if (argc != 2) {
+        printf("Incorrect number of arguments. Format should be: $ ./display_image [ server ip address ] \n");
+        exit(-1);
+    }
+
     openlog(NULL, 0, LOG_USER);
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;
