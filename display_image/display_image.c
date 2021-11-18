@@ -12,12 +12,31 @@
 #include <linux/spi/spidev.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include <signal.h>
+#include <syslog.h>
+#include <string.h>
 #include "gpio.h"
 #include "lcd.h"
 
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    //int socket_fd;
+    struct addrinfo hints;
+    struct addrinfo* res;
+
+    openlog(NULL, 0, LOG_USER);
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if (getaddrinfo(argv[1], "9000", &hints, &res) != 0 ) {
+        syslog(LOG_ERR, "getaddrinfo");
+        exit(-1);
+    }
+
+    /*
     uint16_t color = 0xFFE0;
     int i, j;
     printf("Entering program...\n");
@@ -55,6 +74,7 @@ int main(void) {
         printf("Error in LCD_DeInit()\n");
         return 1;
     }
+    */
 
     return 0;
 }
