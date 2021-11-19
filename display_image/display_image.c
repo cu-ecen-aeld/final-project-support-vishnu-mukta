@@ -22,7 +22,7 @@
 
 
 int main(int argc, char* argv[]) {
-    //int socket_fd;
+    int socket_fd;
     struct addrinfo hints;
     struct addrinfo* res;
 
@@ -40,6 +40,20 @@ int main(int argc, char* argv[]) {
         syslog(LOG_ERR, "getaddrinfo");
         exit(-1);
     }
+
+
+    socket_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (socket_fd < 0) {
+        syslog(LOG_ERR, "socket");
+        exit(-1);
+    }
+
+    if (connect(socket_fd, res->ai_addr, res->ai_addrlen) == -1) {
+        syslog(LOG_ERR, "connect");
+        exit(-1);
+    }
+
+    printf("Connected!\n");
 
     /*
     uint16_t color = 0xFFE0;
