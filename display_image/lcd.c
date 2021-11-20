@@ -82,11 +82,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x00)) {
+    if(LCD_SendDataByte(0x80)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if(LCD_SendDataByte(0x02)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -108,11 +107,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x41)) {
+    if(LCD_SendDataByte(0xC1)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if(LCD_SendDataByte(0x30)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -143,11 +141,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x01)) {
+    if(LCD_SendDataByte(0x81)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -162,11 +159,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x05)) {
+    if(LCD_SendDataByte(0x85)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if(LCD_SendDataByte(0x00)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -321,11 +317,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x06)) {
+    if(LCD_SendDataByte(0x86)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -423,11 +418,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x02)) {
+    if(LCD_SendDataByte(0x82)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if(LCD_SendDataByte(0x27)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -511,11 +505,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x71)) {
+    if(LCD_SendDataByte(0xF1)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if(LCD_SendDataByte(0x37)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -587,11 +580,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x41)) {
+    if(LCD_SendDataByte(0xC1)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if(LCD_SendDataByte(0x48)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
@@ -635,11 +627,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x00)) {
+    if(LCD_SendDataByte(0x80)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -655,11 +646,10 @@ int LCD_Init(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(0x00)) {
+    if(LCD_SendDataByte(0x80)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
-    usleep(150);
     if (CS_Ctrl(GPIO_HIGH)) {
         printf("Error in CS_Ctrl()\n");
         return 1;
@@ -708,7 +698,7 @@ int LCD_SetOrientation(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(MADCTL_MX | MADCTL_BGR)) {
+    if(LCD_SendDataByte(MADCTL_MV | MADCTL_RGB)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }

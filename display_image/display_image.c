@@ -22,6 +22,7 @@
 
 
 int main(int argc, char* argv[]) {
+    /*
     int socket_fd;
     struct addrinfo hints;
     struct addrinfo* res;
@@ -79,10 +80,10 @@ int main(int argc, char* argv[]) {
 
     printf("Bytes recvd: %d\n", recv_bytes);
     printf("Message received from socket server: %s\n", (char *)recv_buff);
+    */
 
-
-    /*
-    uint16_t color = 0xFFE0;
+    
+    uint16_t color = 0x001F; //Blue
     int i, j;
     printf("Entering program...\n");
 
@@ -99,7 +100,7 @@ int main(int argc, char* argv[]) {
     }
 
     //Init LCD module
-    if (LCD_SetBorders(0, 0, 239, 319)) {
+    if (LCD_SetBorders(0, 0, 319, 239)) {
         printf("Error in LCD_SetBorders()\n");
         return 1;
     }
@@ -108,7 +109,7 @@ int main(int argc, char* argv[]) {
 
     printf("Drawing pixel...\n");
     for (j = 0; j < 40; j++) {
-        for (i = 0; i < 240; i++) {
+        for (i = 0; i < 320; i++) {
             LCD_SetAddress(i, j);
             LCD_WritePixel(color);
         }
@@ -119,7 +120,7 @@ int main(int argc, char* argv[]) {
         printf("Error in LCD_DeInit()\n");
         return 1;
     }
-    */
+    
 
     return 0;
 }
