@@ -698,7 +698,7 @@ int LCD_SetOrientation(void) {
         printf("Error in LCD_SendCommandByte()\n");
         return 1;
     }
-    if(LCD_SendDataByte(MADCTL_MV | MADCTL_RGB)) {
+    if(LCD_SendDataByte(MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR)) {
         printf("Error in LCD_SendDataByte()\n");
         return 1;
     }
