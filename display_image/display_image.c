@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     struct addrinfo* res;
 
     if (argc != 2) {
-        printf("Incorrect number of arguments. Format should be: $ ./display_image [ server ip address ] \n");
+        printf("Incorrect number of arguments.\nUsage:\n./display_image [ server ip address ] \n");
         exit(-1);
     }
 
@@ -38,6 +38,7 @@ int main(int argc, char* argv[]) {
 
     if (getaddrinfo(argv[1], "9000", &hints, &res) != 0 ) {
         syslog(LOG_ERR, "getaddrinfo");
+        perror("getaddrinfo");
         exit(-1);
     }
 
@@ -45,11 +46,13 @@ int main(int argc, char* argv[]) {
     socket_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (socket_fd < 0) {
         syslog(LOG_ERR, "socket");
+        perror("socket");
         exit(-1);
     }
 
     if (connect(socket_fd, res->ai_addr, res->ai_addrlen) == -1) {
         syslog(LOG_ERR, "connect");
+        perror("connect");
         exit(-1);
     }
 
