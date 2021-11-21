@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
 
     //Reading test file
     
-    test_fd = open("/var/tmp/test.pgm", O_RDONLY);
+    test_fd = open("/root/test.pgm", O_RDONLY);
     if (test_fd < 0) {
         perror("open");
         exit(-1);
