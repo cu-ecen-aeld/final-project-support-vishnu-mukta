@@ -80,10 +80,12 @@ int main(int argc, char* argv[]) {
 
     printf("Bytes recvd: %d\n", recv_bytes);
     printf("Message received from socket server: %s\n", (char *)recv_buff);
-    */
+    
 
     
-    uint16_t color = 0x001F; //Blue
+    uint16_t color = 0x001F; //Blue*/
+    int test_fd;
+    uint8_t color_buff[1];
     int i, j;
     printf("Entering program...\n");
 
@@ -100,18 +102,30 @@ int main(int argc, char* argv[]) {
     }
 
     //Init LCD module
-    if (LCD_SetBorders(0, 0, 319, 239)) {
+    if (LCD_SetBorders(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1)) {
         printf("Error in LCD_SetBorders()\n");
         return 1;
     }
 
     printf("Init LCD complete...\n");
 
+    //Reading test file
+    
+    test_fd = open("test.pgm", O_RDONLY);
+    if (test_fd < 0) {
+        perror("open");
+        exit(-1);
+    }
+    lseek(test_fd, PGM_HEADER_LEN, SEEK_SET);
+
     printf("Drawing pixel...\n");
-    for (j = 0; j < 40; j++) {
-        for (i = 0; i < 320; i++) {
-            LCD_SetAddress(i, j);
-            LCD_WritePixel(color);
+    for (j = 0; j < LCD_HEIGHT; j++) {
+        for (i = 0; i < LCD_WIDTH; i++) {
+            if ((read(test_fd, &color_buff[0], 1)) == -1) {
+                perror("read");
+                exit(-1);
+            }
+            LCD_WritePGMPixel(i, j, color_buff[0]);
         }
     }
 

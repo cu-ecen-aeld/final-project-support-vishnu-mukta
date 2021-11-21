@@ -17,6 +17,14 @@
 #define MADCTL_BGR 0x08 ///< Blue-Green-Red pixel order
 #define MADCTL_MH 0x04  ///< LCD refresh right to left
 
+#define BLUE_MASK (0x1F)
+#define GREEN_MASK (0x3F)
+#define RED_MASK (0x1F)
+
+#define BLUE_SHIFT (0)
+#define GREEN_SHIFT (5)
+#define RED_SHIFT (11)
+
 
 int LCD_Init(void) {
     if (GPIO_Init()) {
@@ -855,6 +863,24 @@ int LCD_WritePixel(uint16_t color) {
     }
 
     return 0;
+}
+
+
+int LCD_WritePGMPixel(uint16_t x, uint16_t y, uint8_t color) {
+    uint16_t pix_color = 0;
+    pix_color |= ((color >> 3) & BLUE_MASK) << BLUE_SHIFT;
+    pix_color |= ((color >> 2) & GREEN_MASK) << GREEN_SHIFT;
+    pix_color |= ((color >> 3) & RED_MASK) << RED_SHIFT;
+
+//    printf("X address: %d, Y address: %d\n", x, y);
+//    printf("0x%04X\n", pix_color);
+//    printf("%d\n", ((pix_color << BLUE_SHIFT) & BLUE_MASK) >> BLUE_SHIFT);
+//    printf("%d\n", ((pix_color << BLUE_SHIFT) & BLUE_MASK) >> BLUE_SHIFT);
+//    printf("%d\n\n", ((pix_color << BLUE_SHIFT) & BLUE_MASK) >> BLUE_SHIFT);
+
+    LCD_SetAddress(x, y);
+    LCD_WritePixel(pix_color);
+    return 1;
 }
 
 

@@ -5,7 +5,10 @@
 
 #include <stdint.h>
 
-#define LCD_DUMMY_CMD (0x12)
+#define LCD_WIDTH (320)
+#define LCD_HEIGHT (240)
+
+#define PGM_HEADER_LEN  (49)
 
 #define ILI9341_NOP (0x00)     ///< No-op register
 #define ILI9341_SWRESET (0x01) ///< Software reset register
@@ -71,6 +74,7 @@ int LCD_SetOrientation(void);
 int LCD_SetBorders(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 int LCD_SetAddress(uint16_t x, uint16_t y);
 int LCD_WritePixel(uint16_t color);
+int LCD_WritePGMPixel(uint16_t x, uint16_t y, uint8_t color);
 int LCD_DeInit(void);
 
 #endif // __LCD_H
