@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define SPI_CLK_SPEED  (1000000)
+#define SPI_CLK_SPEED  (12000000)
 
 int SPI0_Init(void);
 int SPI0_Write(uint8_t* w_buff, uint8_t w_buff_len);
