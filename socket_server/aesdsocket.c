@@ -96,7 +96,7 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 			case 0:
 				while(1)
 				{
-    				read(searchfd, str, 1); 
+    				read(searchfd, str, 5); 
     				if((strcasecmp(str, "done")) == 0) 
     				{
     					str[4] = '\n';
