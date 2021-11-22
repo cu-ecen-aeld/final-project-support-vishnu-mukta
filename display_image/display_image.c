@@ -22,7 +22,7 @@
 
 
 int main(int argc, char* argv[]) {
-    /*
+    
     int socket_fd;
     struct addrinfo hints;
     struct addrinfo* res;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     printf("Connected!\n");
 
     int send_bytes;
-    send_bytes = send(socket_fd, "Hello, Mukta!\n", 14, 0);
+    send_bytes = send(socket_fd, "capture\n", 8, 0);
     if (send_bytes < 0) {
         syslog(LOG_ERR, "send");
         perror("send");
@@ -71,7 +71,26 @@ int main(int argc, char* argv[]) {
     printf("Bytes sent: %d\n", send_bytes);
 
     int recv_bytes;
-    recv_bytes = recv(socket_fd, recv_buff, 14, 0);
+    recv_bytes = recv(socket_fd, recv_buff, 5, 0);
+    if (recv_bytes < 0) {
+        syslog(LOG_ERR, "recv");
+        perror("recv");
+        exit(-1);
+    }
+
+    printf("Bytes recvd: %d\n", recv_bytes);
+    printf("Message received from socket server: %s\n", (char *)recv_buff);
+
+    send_bytes = send(socket_fd, "get bytes\n", 10, 0);
+    if (send_bytes < 0) {
+        syslog(LOG_ERR, "send");
+        perror("send");
+        exit(-1);
+    }
+
+    printf("Bytes sent: %d\n", send_bytes);
+
+    recv_bytes = recv(socket_fd, recv_buff, 7, 0);
     if (recv_bytes < 0) {
         syslog(LOG_ERR, "recv");
         perror("recv");
@@ -82,8 +101,8 @@ int main(int argc, char* argv[]) {
     printf("Message received from socket server: %s\n", (char *)recv_buff);
     
 
-    
-    uint16_t color = 0x001F; //Blue*/
+    /*
+    uint16_t color = 0x001F; //Blue
     int test_fd;
     uint8_t color_buff[1];
     int i, j;
@@ -135,6 +154,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-
+*/
     return 0;
 }

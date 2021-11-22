@@ -31,6 +31,7 @@
 #define SUCCESS		0
 #define MYPORT		9000
 #define DEF_FILEPATH	"/var/tmp/aesdsocketdata"
+#define IMG_FILEPATH	"/var/test.jpg"
 #define BUFFER_LEN	200
 
 typedef struct
@@ -77,6 +78,93 @@ static void signal_handler(int signo)
 	}
 	
 }
+
+uint8_t cmd_index=0;
+
+char cmd_table[3][12] = { "capture\n", "get bytes\n", "send image\n"};
+
+char *verifysocket(char *buff, int searchfd, int *send_bytes)
+{
+	char *str = (char*)malloc(12);;
+	int bytes=0, ret=0;
+	int img_fd;
+	
+	if((strcasecmp(buff, &cmd_table[cmd_index][0])) == 0)
+	{
+		switch(cmd_index)
+		{
+			case 0:
+				while(1)
+				{
+    				read(searchfd, str, 1); 
+    				if((strcasecmp(str, "done\n")) == 0) 
+    				{
+    					cmd_index=1;
+						*send_bytes = 5;
+    					break;
+    				}
+				}
+			break;
+			
+			case 1:
+				//open jpg file
+				img_fd = open(IMG_FILEPATH, O_RDONLY, 0764);
+				if (img_fd == -1)	
+				{//if error
+					syslog(LOG_ERR, "can't open or create file '%s'\n", IMG_FILEPATH);
+					exit_on_signal = true;
+					cmd_index=0;
+					break;
+				}
+				bytes = lseek(img_fd, 0, SEEK_END);
+				str[0] = '0';
+				str[1] = 'x';
+				str[2] = (char)((bytes & 0xFF000000) >> 24);
+				str[3] = (char)((bytes & 0x00FF0000) >> 16);
+				str[4] = (char)((bytes & 0x0000FF00) >> 8);
+				str[5] = (char)(bytes & 0x000000FF);
+				str[6] = '\n';
+				cmd_index=2;
+				*send_bytes = 7;	
+			break;
+			
+			case 2:
+				//open jpg file
+				img_fd = open(IMG_FILEPATH, O_RDONLY, 0764);
+				if (img_fd == -1)	
+				{//if error
+					syslog(LOG_ERR, "can't open or create file '%s'\n", IMG_FILEPATH);
+					exit_on_signal = true;
+					cmd_index=0;
+					break;
+				}
+				bytes = lseek(img_fd, 0, SEEK_END);
+				
+    			str = (char*)malloc(bytes+1);
+    			
+    			ret = read(img_fd, &str[0], bytes); 
+    			if(ret != bytes)
+    			{
+					syslog(LOG_ERR, "unable to read image properly");
+					cmd_index=0;
+					break;
+    			}
+    			str[bytes] = '\n';
+    			cmd_index=0;    
+    					
+				*send_bytes = bytes+1;			
+			break;
+			
+			default:
+    					cmd_index=0;
+			break;
+		}
+	
+	}
+	return str;
+	 
+}
+
 
 void packetRWthread(void* thread_param)
 {
@@ -142,11 +230,6 @@ void packetRWthread(void* thread_param)
        		break;    	
     }
     
-    if(pthread_mutex_lock(&mutex) != 0)
-	{
-		syslog(LOG_ERR, "pthread_mutex_lock failed");
-		status = false;
-	}
     // Block signals to avoid partial write
     if (sigprocmask(SIG_BLOCK,&mask,NULL) == -1)
     {
@@ -164,27 +247,25 @@ void packetRWthread(void* thread_param)
     {
         syslog(LOG_ERR,"sigprocmask failed");
 		status = false;
-    }		
-	if(pthread_mutex_unlock(&mutex) != 0)
-	{
-		syslog(LOG_ERR, "pthread_mutex_unlock failed");
-		status = false;
-	}
+    }	
     
-
     lseek(thread_func_args->fd, 0, SEEK_SET);
     
     req_size = 0;
-	int ptr=0;
     
+    buffer = verifysocket(buffer, thread_func_args->fd, &req_size);
+    
+	nbytes = send(thread_func_args->acceptedfd, buffer, req_size, 0);
+	if(nbytes != req_size)
+	{
+		syslog(LOG_ERR, "send failed");
+		status = false;
+	}
+    
+    /*
     while(1)
     {
      
-		if(pthread_mutex_lock(&mutex) != 0)
-		{
-			syslog(LOG_ERR, "pthread_mutex_lock failed");
-			status = false;
-		}
 		if (sigprocmask(SIG_BLOCK,&mask,NULL) == -1)
 		{
 		    syslog(LOG_ERR,"sigprocmask failed");
@@ -198,13 +279,7 @@ void packetRWthread(void* thread_param)
 		    syslog(LOG_ERR,"sigprocmask failed");
 			status = false;
 		}
-		
-		if(pthread_mutex_unlock(&mutex) != 0)
-		{
-			syslog(LOG_ERR, "pthread_mutex_unlock failed");
-			status = false;
-		}    
-		
+	
         if (nr == 1)
         {        	  
         	if(buffer[ptr] == '\n')
@@ -248,9 +323,9 @@ void packetRWthread(void* thread_param)
         	syslog(LOG_ERR, "read failed");
 			status = false;
 			break;
-        }
-    	
+        }	
     }
+    */
     
     if (status == true)
     {
