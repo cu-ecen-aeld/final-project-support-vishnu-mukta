@@ -30,7 +30,7 @@
 #define ERROR		1
 #define SUCCESS		0
 #define MYPORT		9000
-#define DEF_FILEPATH	"/var/tmp/aesdsocketdata"
+#define DEF_FILEPATH	"/var/socketdata"
 #define IMG_FILEPATH	"/var/test.jpg"
 #define BUFFER_LEN	200
 
@@ -97,8 +97,9 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 				while(1)
 				{
     				read(searchfd, str, 1); 
-    				if((strcasecmp(str, "done\n")) == 0) 
+    				if((strcasecmp(str, "done")) == 0) 
     				{
+    					str[4] = '\n';
     					cmd_index=1;
 						*send_bytes = 5;
     					break;

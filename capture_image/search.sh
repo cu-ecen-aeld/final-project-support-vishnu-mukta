@@ -6,7 +6,7 @@
 SEARCHSTR=capture
 
 # This is a directory and file where socket data is present
-SEARCHDIR=/tmp/socket-data
+SEARCHDIR=/var/socketdata
 
 y=0
 
@@ -28,7 +28,7 @@ y=0
         y=0
 
         echo "Capture command found"
-        echo "       " > /tmp/socket-data
+        echo "       " > "$SEARCHDIR"
 
         cd /usr/bin
 
@@ -39,6 +39,8 @@ y=0
 
         echo "Compressing image"
         mogrify -format jpg test.pgm
+
+        echo "done" > "$SEARCHDIR"
 
         cd ..
     fi
