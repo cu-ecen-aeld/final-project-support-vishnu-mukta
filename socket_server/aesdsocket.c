@@ -36,47 +36,29 @@
 
 typedef struct
 {
-    pthread_t thread;
     int fd;
     int acceptedfd;
 	struct in_addr sin_addr;
     bool thread_complete_success;
     bool complete_status_flag;
 
-}thread_data;
+}func_data;
 
-
-typedef struct slist_data_s slist_data_t;
-struct slist_data_s{
-
-    thread_data params;
-    SLIST_ENTRY(slist_data_s) entries;
-};
 
 int sockfd;
 int exit_on_signal=0;
-
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 //Function:	static void signal_handler(int signo)
 //Inputs:	signo - Signal number
 static void signal_handler(int signo)
 {
-
-	syslog(LOG_DEBUG, "in handler\n");
 	if(signo == SIGINT || signo==SIGTERM) 
-	{
-		if(signo == SIGINT)
-			syslog(LOG_DEBUG, "Caught signal SIGINT, exiting\n");
-		else
-			syslog(LOG_DEBUG, "Caught signal SIGTERM, exiting\n");
-			
+	{			
 		shutdown(sockfd, SHUT_RDWR);
 
 		exit_on_signal = true;
 	}
-	
 }
 
 uint8_t cmd_index=0;
@@ -165,16 +147,13 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
     					cmd_index=0;
 			break;
 		}
-	
 	}
 	return str;
-	 
 }
 
 
-void packetRWthread(void* thread_param)
+void packetRWthread(func_data *func_args)
 {
-    thread_data *thread_func_args = (thread_data*)thread_param;
 	bool status = true;
 
     int req_size=0;
@@ -207,7 +186,7 @@ void packetRWthread(void* thread_param)
     
     while(1)
     {
-    	nbytes = recv(thread_func_args->acceptedfd, buffer+req_size, BUFFER_LEN, 0);
+    	nbytes = recv(func_args->acceptedfd, buffer+req_size, BUFFER_LEN, 0);
     	if(nbytes == -1)
     	{
 		    syslog(LOG_ERR,"receive failed");
@@ -242,7 +221,7 @@ void packetRWthread(void* thread_param)
         syslog(LOG_ERR,"sigprocmask failed");
 		status = false;
     }	
-	nr = write(thread_func_args->fd, buffer, req_size);
+	nr = write(func_args->fd, buffer, req_size);
 	if (nr == -1)	
 	{//if error
 		syslog(LOG_ERR, "can't write received string in file '%s'", DEF_FILEPATH);
@@ -255,100 +234,33 @@ void packetRWthread(void* thread_param)
 		status = false;
     }	
     
-    lseek(thread_func_args->fd, 0, SEEK_SET);
+    lseek(func_args->fd, 0, SEEK_SET);
     
     req_size = 0;
     
-    buffer = verifysocket(buffer, thread_func_args->fd, &req_size);
+    buffer = verifysocket(buffer, func_args->fd, &req_size);
     
-	nbytes = send(thread_func_args->acceptedfd, buffer, req_size, 0);
+	nbytes = send(func_args->acceptedfd, buffer, req_size, 0);
 	if(nbytes != req_size)
 	{
 		syslog(LOG_ERR, "send failed");
 		status = false;
 	}
     
-    /*
-    while(1)
-    {
-     
-		if (sigprocmask(SIG_BLOCK,&mask,NULL) == -1)
-		{
-		    syslog(LOG_ERR,"sigprocmask failed");
-			status = false;
-		}
-    
-    	nr = read(thread_func_args->fd, &buffer[ptr], 1);    
-    
-		if (sigprocmask(SIG_UNBLOCK,&mask,NULL) == -1)
-		{
-		    syslog(LOG_ERR,"sigprocmask failed");
-			status = false;
-		}
-	
-        if (nr == 1)
-        {        	  
-        	if(buffer[ptr] == '\n')
-        	{
-        		req_size = (ptr+1);
-        		nbytes = send(thread_func_args->acceptedfd, buffer, req_size, 0);
-        		if(nbytes != req_size)
-        		{
-					syslog(LOG_ERR, "send failed");
-					break;
-        		}
-        		ptr=0;
-        		memset(buffer, 0, req_size);
-        	}
-        	else
-        	{
-        		ptr++;
-        	
-				if(size < (ptr+1))
-				{
-					size += BUFFER_LEN;
-					rebuffer = realloc(buffer,sizeof(char)*size);
-					if(rebuffer == NULL)
-					{
-						syslog(LOG_ERR,"realloc failed");
-						status = false;
-						break;
-					}
-					buffer = rebuffer;
-				}
-        	}
-        	
-        }
-        else if (nr == 0)
-        {
-        	syslog(LOG_DEBUG, "read done");
-        	break;
-        }
-        else
-        {
-        	syslog(LOG_ERR, "read failed");
-			status = false;
-			break;
-        }	
-    }
-    */
-    
     if (status == true)
     {
 		syslog(LOG_DEBUG, "Successful");
     }
     
-	syslog(LOG_DEBUG, "Closing connection from '%s'\n", inet_ntoa((struct in_addr)thread_func_args->sin_addr));
-    close(thread_func_args->acceptedfd);
+	syslog(LOG_DEBUG, "Closing connection from '%s'\n", inet_ntoa((struct in_addr)func_args->sin_addr));
+    close(func_args->acceptedfd);
 
     //status true
-	thread_func_args->thread_complete_success = status;
-    thread_func_args->complete_status_flag = true;
+	func_args->thread_complete_success = status;
+    func_args->complete_status_flag = true;
 
     free(buffer);
     free(rebuffer);
-    
-    pthread_exit(NULL);
 }
 
 
@@ -364,10 +276,7 @@ int main(int argc, char* argv[])
 	int fd; 
     socklen_t len;
     int ret = 0;
-
-	slist_data_t *datap = NULL;
-	SLIST_HEAD(slisthead,slist_data_s) head;
-    SLIST_INIT(&head);
+    func_data funcdata;
             
 	syslog(LOG_INFO, "aesdsocket code started\n");
 	
@@ -499,31 +408,15 @@ int main(int argc, char* argv[])
 			break;
 			
 		syslog(LOG_DEBUG, "Accepted connection from '%s'\n", inet_ntoa((struct in_addr)saddr.sin_addr));
-
-		datap = malloc(sizeof(slist_data_t));
-		if (datap == NULL)
-		{
-			syslog(LOG_ERR, "malloc failed\n");
-			exit_on_error = true;
-			goto EXITING;
-		}
-			
-		SLIST_INSERT_HEAD(&head,datap,entries);
-		datap->params.acceptedfd = acceptedfd;
-		datap->params.complete_status_flag = false;
-		datap->params.thread_complete_success = false;
-		datap->params.sin_addr = saddr.sin_addr;
-		datap->params.fd=fd;
-
-		pthread_create(&(datap->params.thread), NULL, (void*)&packetRWthread, (void*)&(datap->params));
-
-		SLIST_FOREACH(datap,&head,entries)
-		{
-		    if (datap->params.complete_status_flag == true)
-		        pthread_join(datap->params.thread,NULL);
-		    else
-		    	continue;
-    	}
+		
+		funcdata.fd = fd;
+		funcdata.acceptedfd = acceptedfd;
+		funcdata.sin_addr = saddr.sin_addr;
+		funcdata.thread_complete_success = false;
+		funcdata.complete_status_flag = false;
+		
+		packetRWthread(&funcdata);
+		
 	}
 
 EXITING:
@@ -544,22 +437,7 @@ EXITING:
 		close(fd);
 		remove(DEF_FILEPATH);
 	}
-	
-	SLIST_FOREACH(datap,&head,entries)
-	{
-	    if (datap->params.complete_status_flag == false)
-	    	pthread_cancel(datap->params.thread);
-	}
 
-	while (!SLIST_EMPTY(&head)) 
-	{
-        datap = SLIST_FIRST(&head);
-        SLIST_REMOVE_HEAD(&head, entries);
-        free(datap);
-		datap = NULL;
-    }
-
-	pthread_mutex_destroy(&mutex);
 	closelog();
 	
 	if (exit_on_error && exit_on_signal==false)
