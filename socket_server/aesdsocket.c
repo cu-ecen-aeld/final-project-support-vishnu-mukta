@@ -85,7 +85,7 @@ char cmd_table[3][12] = { "capture\n", "get bytes\n", "send image\n"};
 
 char *verifysocket(char *buff, int searchfd, int *send_bytes)
 {
-	char *str = (char*)malloc(12);;
+	char *str = (char*)malloc(12);
 	int bytes=0, ret=0;
 	int img_fd;
 	
@@ -96,9 +96,12 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 			case 0:
 				while(1)
 				{
-    				read(searchfd, str, 4); 
+    				read(searchfd, &str[0], 4); 
+					syslog(LOG_INFO, "str:'%s'\n", str);
+    				
     				if((strcasecmp(str, "done")) == 0) 
     				{
+						syslog(LOG_INFO, "done\n");
     					str[4] = '\n';
     					cmd_index=1;
 						*send_bytes = 5;
