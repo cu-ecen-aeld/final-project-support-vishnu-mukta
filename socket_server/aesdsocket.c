@@ -97,7 +97,7 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 				while(1)
 				{
 					sleep(1);
-					lseek(img_fd, 0, SEEK_SET);
+					lseek(searchfd, 0, SEEK_SET);
     				read(searchfd, &str[0], 4); 
 					syslog(LOG_INFO, "str:'%s'\n", str);
     				
