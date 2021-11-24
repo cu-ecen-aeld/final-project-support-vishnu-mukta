@@ -71,8 +71,13 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 	int bytes=0, ret=0;
 	int img_fd;
 	
+	
+    syslog(LOG_DEBUG, "buffer: %s\n", buffer);
+    syslog(LOG_DEBUG, "cmd_index: %d\n", cmd_index);
+	
 	if((strcasecmp(buff, &cmd_table[cmd_index][0])) == 0)
 	{
+    	syslog(LOG_DEBUG, "compare successful\n");
 		switch(cmd_index)
 		{
 			case 0:
@@ -215,6 +220,8 @@ void packetRWthread(func_data *func_args)
        		break;    	
     }
     
+    syslog(LOG_DEBUG, "Recv: %s\n", buffer);
+    
     // Block signals to avoid partial write
     if (sigprocmask(SIG_BLOCK,&mask,NULL) == -1)
     {
@@ -227,6 +234,7 @@ void packetRWthread(func_data *func_args)
 		syslog(LOG_ERR, "can't write received string in file '%s'", DEF_FILEPATH);
 		status = false;
 	}
+    syslog(LOG_DEBUG, "nr: %d\n", nr);
     // Block signals to avoid partial write
     if (sigprocmask(SIG_UNBLOCK,&mask,NULL) == -1)
     {
@@ -239,6 +247,9 @@ void packetRWthread(func_data *func_args)
     req_size = 0;
     
     buffer = verifysocket(buffer, func_args->fd, &req_size);
+    
+    syslog(LOG_DEBUG, "req_size: %d\n", req_size);
+    syslog(LOG_DEBUG, "buffer: %s\n", buffer);
     
 	nbytes = send(func_args->acceptedfd, buffer, req_size, 0);
 	if(nbytes != req_size)
