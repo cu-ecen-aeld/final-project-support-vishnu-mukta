@@ -72,7 +72,7 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 	int img_fd;
 	
 	
-    syslog(LOG_DEBUG, "buffer: %s\n", buffer);
+    syslog(LOG_DEBUG, "buff: %s\n", buff);
     syslog(LOG_DEBUG, "cmd_index: %d\n", cmd_index);
 	
 	if((strcasecmp(buff, &cmd_table[cmd_index][0])) == 0)
@@ -234,7 +234,7 @@ void packetRWthread(func_data *func_args)
 		syslog(LOG_ERR, "can't write received string in file '%s'", DEF_FILEPATH);
 		status = false;
 	}
-    syslog(LOG_DEBUG, "nr: %d\n", nr);
+    syslog(LOG_DEBUG, "nr: %ld\n", nr);
     // Block signals to avoid partial write
     if (sigprocmask(SIG_UNBLOCK,&mask,NULL) == -1)
     {
