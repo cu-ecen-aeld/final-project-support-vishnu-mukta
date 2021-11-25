@@ -110,11 +110,16 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 					break;
 				}
 				bytes = lseek(img_fd, 0, SEEK_END);
+    			syslog(LOG_DEBUG, "bytes: %d\n", bytes);
 				str[0] = (char)((bytes & 0xFF000000) >> 24);
 				str[1] = (char)((bytes & 0x00FF0000) >> 16);
 				str[2] = (char)((bytes & 0x0000FF00) >> 8);
 				str[3] = (char)(bytes & 0x000000FF);
-				cmd_index=2;
+    			syslog(LOG_DEBUG, "str[0]: %x\n", str[0]);
+    			syslog(LOG_DEBUG, "str[1]: %x\n", str[1]);
+    			syslog(LOG_DEBUG, "str[2]: %x\n", str[2]);
+    			syslog(LOG_DEBUG, "str[3]: %x\n", str[3]);
+				cmd_index=0;
 				*send_bytes = 4;	
 			break;
 			
