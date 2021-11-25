@@ -38,7 +38,6 @@ typedef struct
 {
     int fd;
     int acceptedfd;
-	struct in_addr sin_addr;
     bool thread_complete_success;
     bool complete_status_flag;
 
@@ -263,9 +262,6 @@ void packetRWthread(func_data *func_args)
     {
 		syslog(LOG_DEBUG, "Successful");
     }
-    
-	syslog(LOG_DEBUG, "Closing connection from '%s'\n", inet_ntoa((struct in_addr)func_args->sin_addr));
-    close(func_args->acceptedfd);
 
     //status true
 	func_args->thread_complete_success = status;
@@ -398,38 +394,34 @@ int main(int argc, char* argv[])
 		exit_on_error = true;
 		goto EXITING;
 	}
-    
+    len = sizeof(struct sockaddr);
+		
+	//accept connection
+	acceptedfd = accept(sockfd, (struct sockaddr *) &saddr, &len);
+			
+	if (acceptedfd == -1)
+	{
+		syslog(LOG_ERR, "socket accepting failed\n");
+		exit_on_error = true;
+		goto EXITING;
+	}
+	syslog(LOG_DEBUG, "Accepted connection from '%s'\n", inet_ntoa((struct in_addr)saddr.sin_addr));
+		
     while(exit_on_signal==0) 
-    {
-
-		len = sizeof(struct sockaddr);
-		
-		//accept connection
-		acceptedfd = accept(sockfd, (struct sockaddr *) &saddr, &len);
-		
-		if(exit_on_signal || exit_on_error)
-			break;
-			
-		if (acceptedfd == -1)
-		{
-			syslog(LOG_ERR, "socket accepting failed\n");
-			exit_on_error = true;
-			goto EXITING;
-		}
-		if(exit_on_signal || exit_on_error)
-			break;
-			
-		syslog(LOG_DEBUG, "Accepted connection from '%s'\n", inet_ntoa((struct in_addr)saddr.sin_addr));
-		
+    {		
 		funcdata.fd = fd;
 		funcdata.acceptedfd = acceptedfd;
-		funcdata.sin_addr = saddr.sin_addr;
-		funcdata.thread_complete_success = false;
-		funcdata.complete_status_flag = false;
+		funcdata.thread_complete_success = true;
+		funcdata.complete_status_flag = true;
 		
 		packetRWthread(&funcdata);
 		
+		if(exit_on_signal || exit_on_error || funcdata.thread_complete_success==false)
+			break;
 	}
+
+	syslog(LOG_DEBUG, "Closing connection from '%s'\n", inet_ntoa((struct in_addr)saddr.sin_addr));
+    close(acceptedfd);
 
 EXITING:
 
