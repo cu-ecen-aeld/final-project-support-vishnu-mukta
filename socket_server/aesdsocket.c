@@ -64,6 +64,7 @@ static void signal_handler(int signo)
 uint8_t cmd_index=0;
 
 char cmd_table[3][12] = { "capture\n", "get bytes\n", "send image\n"};
+char cmd_size[3] = { 7, 9, 10};
 
 char *verifysocket(char *buff, int searchfd, int *send_bytes)
 {
@@ -75,7 +76,7 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
     syslog(LOG_DEBUG, "buff: %s\n", buff);
     syslog(LOG_DEBUG, "cmd_index: %d\n", cmd_index);
 	
-	if((strcasecmp(buff, &cmd_table[cmd_index][0])) == 0)
+	if((strncasecmp(buff, &cmd_table[cmd_index][0], cmd_size[cmd_index])) == 0)
 	{
     	syslog(LOG_DEBUG, "compare successful\n");
 		switch(cmd_index)
