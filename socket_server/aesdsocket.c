@@ -110,15 +110,12 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 					break;
 				}
 				bytes = lseek(img_fd, 0, SEEK_END);
-				str[0] = '0';
-				str[1] = 'x';
-				str[2] = (char)((bytes & 0xFF000000) >> 24);
-				str[3] = (char)((bytes & 0x00FF0000) >> 16);
-				str[4] = (char)((bytes & 0x0000FF00) >> 8);
-				str[5] = (char)(bytes & 0x000000FF);
-				str[6] = '\n';
+				str[0] = (char)((bytes & 0xFF000000) >> 24);
+				str[1] = (char)((bytes & 0x00FF0000) >> 16);
+				str[2] = (char)((bytes & 0x0000FF00) >> 8);
+				str[3] = (char)(bytes & 0x000000FF);
 				cmd_index=2;
-				*send_bytes = 7;	
+				*send_bytes = 4;	
 			break;
 			
 			case 2:
