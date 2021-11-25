@@ -89,7 +89,7 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
     				read(searchfd, &str[0], 4); 
 					syslog(LOG_INFO, "str:'%s'\n", str);
     				
-    				if((strcasecmp(str, "done")) == 0) 
+    				if((strncasecmp(str, "done", 4)) == 0) 
     				{
 						syslog(LOG_INFO, "done\n");
     					str[4] = '\n';
