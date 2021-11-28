@@ -31,7 +31,7 @@
 #define SUCCESS		0
 #define MYPORT		9000
 #define DEF_FILEPATH	"/var/socketdata"
-#define IMG_FILEPATH	"/var/test.jpg"
+#define IMG_FILEPATH	"/var/test.pgm"
 #define BUFFER_LEN	200
 
 typedef struct
