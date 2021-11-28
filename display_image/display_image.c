@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-    test_pgm_fd = open("test_pgm.pgm", O_CREAT | O_RDWR | O_TRUNC, 0777);
+    test_pgm_fd = open("/root/pgm_image.pgm", O_CREAT | O_RDWR | O_TRUNC, 0777);
     if (test_pgm_fd < 0) {
         syslog(LOG_ERR, "open");
         perror("open");
