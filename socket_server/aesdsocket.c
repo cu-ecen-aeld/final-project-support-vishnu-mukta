@@ -38,7 +38,6 @@ typedef struct
 {
     int fd;
     int acceptedfd;
-    bool thread_complete_success;
     bool complete_status_flag;
 
 }func_data;
@@ -61,16 +60,15 @@ static void signal_handler(int signo)
 }
 
 uint8_t cmd_index=0;
+char *str = NULL;
 
 char cmd_table[3][12] = { "capture\n", "get bytes\n", "send image\n"};
 char cmd_size[3] = { 7, 9, 10};
 
-char *verifysocket(char *buff, int searchfd, int *send_bytes)
+void verifysocket(char *buff, int searchfd, int *send_bytes)
 {
-	char *str = (char*)malloc(12);
 	int bytes=0, ret=0;
 	int img_fd;
-	
 	
     syslog(LOG_DEBUG, "buff: %s\n", buff);
     syslog(LOG_DEBUG, "cmd_index: %d\n", cmd_index);
@@ -115,12 +113,13 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 				str[1] = (char)((bytes & 0x00FF0000) >> 16);
 				str[2] = (char)((bytes & 0x0000FF00) >> 8);
 				str[3] = (char)(bytes & 0x000000FF);
-    			syslog(LOG_DEBUG, "str[0]: %x\n", str[0]);
-    			syslog(LOG_DEBUG, "str[1]: %x\n", str[1]);
-    			syslog(LOG_DEBUG, "str[2]: %x\n", str[2]);
-    			syslog(LOG_DEBUG, "str[3]: %x\n", str[3]);
-				cmd_index=0;
+    			syslog(LOG_DEBUG, "str[0]: 0x%x\n", str[0]);
+    			syslog(LOG_DEBUG, "str[1]: 0x%x\n", str[1]);
+    			syslog(LOG_DEBUG, "str[2]: 0x%x\n", str[2]);
+    			syslog(LOG_DEBUG, "str[3]: 0x%x\n", str[3]);
+				cmd_index=2;
 				*send_bytes = 4;	
+				close(img_fd);
 			break;
 			
 			case 2:
@@ -134,7 +133,9 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 					break;
 				}
 				bytes = lseek(img_fd, 0, SEEK_END);
+    			syslog(LOG_DEBUG, "image size: 0x%x\n", bytes);
 				
+				lseek(img_fd, 0, SEEK_SET);
     			str = (char*)malloc(bytes+1);
     			
     			ret = read(img_fd, &str[0], bytes); 
@@ -147,7 +148,8 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
     			str[bytes] = '\n';
     			cmd_index=0;    
     					
-				*send_bytes = bytes+1;			
+				*send_bytes = bytes+1;		
+				close(img_fd);		
 			break;
 			
 			default:
@@ -155,7 +157,6 @@ char *verifysocket(char *buff, int searchfd, int *send_bytes)
 			break;
 		}
 	}
-	return str;
 }
 
 
@@ -248,12 +249,12 @@ void packetRWthread(func_data *func_args)
     
     req_size = 0;
     
-    buffer = verifysocket(buffer, func_args->fd, &req_size);
+    verifysocket(buffer, func_args->fd, &req_size);
     
     syslog(LOG_DEBUG, "req_size: %d\n", req_size);
-    syslog(LOG_DEBUG, "buffer: %s\n", buffer);
+    syslog(LOG_DEBUG, "str buffer: %s\n", str);
     
-	nbytes = send(func_args->acceptedfd, buffer, req_size, 0);
+	nbytes = send(func_args->acceptedfd, str, req_size, 0);
 	if(nbytes != req_size)
 	{
 		syslog(LOG_ERR, "send failed");
@@ -266,8 +267,7 @@ void packetRWthread(func_data *func_args)
     }
 
     //status true
-	func_args->thread_complete_success = status;
-    func_args->complete_status_flag = true;
+    func_args->complete_status_flag = status;
 
     free(buffer);
     free(rebuffer);
@@ -287,6 +287,9 @@ int main(int argc, char* argv[])
     socklen_t len;
     int ret = 0;
     func_data funcdata;
+    
+    
+	str = (char*)malloc(320*240);
             
 	syslog(LOG_INFO, "aesdsocket code started\n");
 	
@@ -413,12 +416,11 @@ int main(int argc, char* argv[])
     {		
 		funcdata.fd = fd;
 		funcdata.acceptedfd = acceptedfd;
-		funcdata.thread_complete_success = true;
 		funcdata.complete_status_flag = true;
 		
 		packetRWthread(&funcdata);
 		
-		if(exit_on_signal || exit_on_error || funcdata.thread_complete_success==false)
+		if(exit_on_signal || exit_on_error)
 			break;
 	}
 
@@ -434,6 +436,9 @@ EXITING:
 
 	//if(acceptedfd)
 	//	close(acceptedfd);
+	
+	if(str != NULL)
+		free(str);
 
 	if(sockfd)
 		close(sockfd);
