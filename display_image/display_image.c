@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <netdb.h>
 #include <signal.h>
 #include <syslog.h>
@@ -20,13 +21,24 @@
 #include "gpio.h"
 #include "lcd.h"
 
+#define PGM_BYTES_CHUNK     (256)
+#define PGM_SIZE            (76800)
+
+uint8_t pgm_buff[PGM_BYTES_CHUNK] = { 0 };
+
 
 int main(int argc, char* argv[]) {
     
-    int socket_fd;
+    int socket_fd, test_pgm_fd;
     struct addrinfo hints;
     struct addrinfo* res;
+    int send_bytes = 0, recv_bytes = 0, pgm_write_bytes;
     uint8_t recv_buff[15] = { 0 };
+    uint32_t pgm_len = 0;
+    //uint8_t* pgm_buff;
+    uint32_t pgm_bytes_recvd = 0, pgm_bytes_to_recv = 0;
+    //pid_t pid;
+    //int status, exit_status;
 
     if (argc != 2) {
         printf("Incorrect number of arguments.\nUsage:\n./display_image [ server ip address ] \n");
@@ -60,7 +72,6 @@ int main(int argc, char* argv[]) {
 
     printf("Connected!\n");
 
-    int send_bytes;
     send_bytes = send(socket_fd, "capture\n", 8, 0);
     if (send_bytes < 0) {
         syslog(LOG_ERR, "send");
@@ -70,7 +81,6 @@ int main(int argc, char* argv[]) {
 
     printf("Bytes sent: %d\n", send_bytes);
 
-    int recv_bytes;
     recv_bytes = recv(socket_fd, recv_buff, 5, 0);
     if (recv_bytes < 0) {
         syslog(LOG_ERR, "recv");
@@ -90,7 +100,7 @@ int main(int argc, char* argv[]) {
 
     printf("Bytes sent: %d\n", send_bytes);
 
-    recv_bytes = recv(socket_fd, recv_buff, 7, 0);
+    recv_bytes = recv(socket_fd, recv_buff, sizeof(uint32_t), 0);
     if (recv_bytes < 0) {
         syslog(LOG_ERR, "recv");
         perror("recv");
@@ -98,7 +108,78 @@ int main(int argc, char* argv[]) {
     }
 
     printf("Bytes recvd: %d\n", recv_bytes);
-    printf("Message received from socket server: %s\n", (char *)recv_buff);
+    pgm_len = *((uint32_t *)(&recv_buff[0]));
+    pgm_len = ntohl(pgm_len);
+
+    printf("pgm_len: %d\n", pgm_len);
+
+
+    send_bytes = send(socket_fd, "send image\n", 11, 0);
+    if (send_bytes < 0) {
+        syslog(LOG_ERR, "send");
+        perror("send");
+        exit(-1);
+    }
+
+    test_pgm_fd = open("test_pgm.pgm", O_CREAT | O_RDWR | O_TRUNC, 0777);
+    if (test_pgm_fd < 0) {
+        syslog(LOG_ERR, "open");
+        perror("open");
+        exit(-1);
+    }
+
+    while (pgm_bytes_recvd < pgm_len) {
+        if (pgm_bytes_recvd + PGM_BYTES_CHUNK > pgm_len) {
+            pgm_bytes_to_recv = pgm_len - pgm_bytes_recvd;
+        }
+        else {
+            pgm_bytes_to_recv = PGM_BYTES_CHUNK;
+        }
+
+        recv_bytes = recv(socket_fd, &pgm_buff[0], pgm_bytes_to_recv, 0);
+        if (recv_bytes < 0) {
+            syslog(LOG_ERR, "recv");
+            perror("recv");
+            exit(-1);
+        }
+
+        pgm_write_bytes = write(test_pgm_fd, &pgm_buff[0], recv_bytes);
+        if (pgm_write_bytes < 0) {
+            syslog(LOG_ERR, "recv");
+            perror("recv");
+            exit(-1);
+        }
+
+        pgm_bytes_recvd += recv_bytes;
+
+        printf("pgm_bytes_recvd: %d\n", pgm_bytes_recvd);
+    }
+
+    printf("pgm of %d bytes length received\n", pgm_bytes_recvd);
+
+    close(test_pgm_fd);
+
+    /*pid = fork();
+    if (pid == -1) {
+        syslog(LOG_ERR, "fork");
+        perror("fork");
+        exit(-1);
+    }
+    else if (pid == 0) {
+        execl("/usr/bin/mogrify", "/usr/bin/mogrify", "-write", "../foo.pgm", "-format", "pgm", "test_pgm.pgm", (char *)NULL);
+        exit(-1);
+    }
+    else {
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) {
+            exit_status = WEXITSTATUS(status);
+            if (exit_status != 0) {
+                printf("Something went wrong in execl\n");
+                exit(-1);
+            }
+        }
+    }*/
+    printf("Converted image!\n");
     
 
     /*
