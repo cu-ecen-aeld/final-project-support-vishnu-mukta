@@ -8,8 +8,6 @@
 #define LCD_WIDTH (320)
 #define LCD_HEIGHT (240)
 
-#define PGM_HEADER_LEN  (49)
-
 #define ILI9341_NOP (0x00)     ///< No-op register
 #define ILI9341_SWRESET (0x01) ///< Software reset register
 #define ILI9341_RDDID (0x04)   ///< Read display identification information

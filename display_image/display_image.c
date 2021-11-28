@@ -39,6 +39,8 @@ int main(int argc, char* argv[]) {
     uint32_t pgm_bytes_recvd = 0, pgm_bytes_to_recv = 0;
     //pid_t pid;
     //int status, exit_status;
+    uint8_t color_buff[1];
+    int i, j;
 
     if (argc != 2) {
         printf("Incorrect number of arguments.\nUsage:\n./display_image [ server ip address ] \n");
@@ -152,14 +154,14 @@ int main(int argc, char* argv[]) {
 
         pgm_bytes_recvd += recv_bytes;
 
-        printf("pgm_bytes_recvd: %d\n", pgm_bytes_recvd);
+        //printf("pgm_bytes_recvd: %d\n", pgm_bytes_recvd);
     }
 
     printf("pgm of %d bytes length received\n", pgm_bytes_recvd);
 
-    close(test_pgm_fd);
+    /*close(test_pgm_fd);
 
-    /*pid = fork();
+    pid = fork();
     if (pid == -1) {
         syslog(LOG_ERR, "fork");
         perror("fork");
@@ -182,12 +184,9 @@ int main(int argc, char* argv[]) {
     printf("Converted image!\n");
     
 
-    /*
-    uint16_t color = 0x001F; //Blue
-    int test_fd;
-    uint8_t color_buff[1];
-    int i, j;
-    printf("Entering program...\n");
+    
+
+    //printf("Entering program...\n");
 
     //Init LCD module
     if (LCD_Init()) {
@@ -211,17 +210,17 @@ int main(int argc, char* argv[]) {
 
     //Reading test file
     
-    test_fd = open("/root/test.pgm", O_RDONLY);
-    if (test_fd < 0) {
+    /*test_pgm_fd = open("/root/test.pgm", O_RDONLY);
+    if (test_pgm_fd < 0) {
         perror("open");
         exit(-1);
-    }
-    lseek(test_fd, PGM_HEADER_LEN, SEEK_SET);
+    }*/
+    lseek(test_pgm_fd, pgm_len - PGM_SIZE, SEEK_SET);
 
-    printf("Drawing pixel...\n");
+    printf("Drawing pixels...\n");
     for (j = 0; j < LCD_HEIGHT; j++) {
         for (i = 0; i < LCD_WIDTH; i++) {
-            if ((read(test_fd, &color_buff[0], 1)) == -1) {
+            if ((read(test_pgm_fd, &color_buff[0], 1)) == -1) {
                 perror("read");
                 exit(-1);
             }
@@ -229,12 +228,12 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    close(test_pgm_fd);
     //DeInit LCD module
     if (LCD_DeInit()) {
         printf("Error in LCD_DeInit()\n");
         return 1;
     }
     
-*/
     return 0;
 }
