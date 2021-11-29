@@ -32,7 +32,7 @@ int GPIO_Init(void) {
     }
 
     close(exp_fd);
-    printf("Exported GPIO25\n");
+    //printf("Exported GPIO25\n");
 
     //enable DC
     exp_fd = open(GPIO_EXPORT_PATH, O_WRONLY);
@@ -48,7 +48,7 @@ int GPIO_Init(void) {
     }
 
     close(exp_fd);
-    printf("Exported GPIO24\n");
+    //printf("Exported GPIO24\n");
 
     //enable RST
     exp_fd = open(GPIO_EXPORT_PATH, O_WRONLY);
@@ -64,7 +64,7 @@ int GPIO_Init(void) {
     }
 
     close(exp_fd);
-    printf("Exported GPIO23\n");
+    //printf("Exported GPIO23\n");
 
     //set gpio25 to output
     dir_fd = open(CS_GPIO_PIN_DIR_PATH, O_WRONLY);
@@ -80,7 +80,7 @@ int GPIO_Init(void) {
     }
 
     close(dir_fd);
-    printf("Set GPIO25 as output\n");
+    //printf("Set GPIO25 as output\n");
 
     //set gpio24 to output
     dir_fd = open(DC_GPIO_PIN_DIR_PATH, O_WRONLY);
@@ -96,7 +96,7 @@ int GPIO_Init(void) {
     }
 
     close(dir_fd);
-    printf("Set GPIO24 as output\n");
+    //printf("Set GPIO24 as output\n");
 
     //set gpio23 to output
     dir_fd = open(RST_GPIO_PIN_DIR_PATH, O_WRONLY);
@@ -112,7 +112,7 @@ int GPIO_Init(void) {
     }
 
     close(dir_fd);
-    printf("Set GPIO23 as output\n");
+    //printf("Set GPIO23 as output\n");
 
     //open gpio ports
     cs_fd = open(CS_GPIO_PIN_VAL_PATH, O_WRONLY);
@@ -148,9 +148,9 @@ int GPIO_Init(void) {
         printf("Did not write output 0\n");
     }
 
-    printf("Opened CS\n");
-    printf("Opened DC\n");
-    printf("Opened RST\n");
+    //printf("Opened CS\n");
+    //printf("Opened DC\n");
+    //printf("Opened RST\n");
 
     return 0;
 }
@@ -256,7 +256,7 @@ int GPIO_DeInit(void) {
     }
 
     close(unexp_fd);
-    printf("Unexported GPIO25\n");
+    //printf("Unexported GPIO25\n");
 
     //deinit gpio24
     unexp_fd = open(GPIO_UNEXPORT_PATH, O_WRONLY);
@@ -272,7 +272,7 @@ int GPIO_DeInit(void) {
     }
 
     close(unexp_fd);
-    printf("Unexported GPIO24\n");
+    //printf("Unexported GPIO24\n");
 
     //deinit gpio23
     unexp_fd = open(GPIO_UNEXPORT_PATH, O_WRONLY);
@@ -288,7 +288,7 @@ int GPIO_DeInit(void) {
     }
 
     close(unexp_fd);
-    printf("Unexported GPIO23\n");
+    //printf("Unexported GPIO23\n");
 
     return 0;
 }

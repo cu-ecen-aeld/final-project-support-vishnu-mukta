@@ -24,7 +24,7 @@ int SPI0_Init(void) {
         return 1;
     }
 
-    printf("Opened spidev0.0\n");
+    //printf("Opened spidev0.0\n");
 
     sys_status = ioctl(spi_fd, SPI_IOC_WR_MODE, &mode);
     if (sys_status < 0) {
@@ -32,7 +32,7 @@ int SPI0_Init(void) {
         return 1;
     }
 
-    printf("WR mode set\n");
+    //printf("WR mode set\n");
 
     sys_status = ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
     if (sys_status < 0) {
@@ -40,7 +40,7 @@ int SPI0_Init(void) {
         return 1;
     }
 
-    printf("WR bits per word set\n");
+    //printf("WR bits per word set\n");
 
     sys_status = ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
     if (sys_status < 0) {
@@ -48,7 +48,7 @@ int SPI0_Init(void) {
         return 1;
     }
 
-    printf("WR speed set\n");
+    //printf("WR speed set\n");
 
     return 0;
 }
