@@ -65,6 +65,66 @@ char *str = NULL;
 char cmd_table[3][12] = { "capture\n", "get bytes\n", "send image\n"};
 char cmd_size[3] = { 7, 9, 10};
 
+bool do_exec()
+{
+	int status;
+	pid_t pid, pid_comp;
+
+	//capture image
+	pid = fork();
+
+	if (pid == -1)
+	{
+		return false;
+	}	
+	else if (pid == 0) 
+	{
+		execl("/usr/bin/capture", "/usr/bin/capture");
+		perror("execl");
+		exit (-1);
+		return false; 
+	}
+	else if (pid > 0)
+	{
+		if (waitpid (pid, &status, 0) == -1)
+			return false;
+
+		else if (WIFEXITED (status))
+		{
+			if (WEXITSTATUS (status) != 0)
+				return false;
+		}
+	}
+	
+	//compress image
+	pid_comp = fork();
+
+	if (pid_comp == -1)
+	{
+		return false;
+	}	
+	else if (pid_comp == 0) 
+	{
+		execl("/usr/bin/mogrify", "/usr/bin/mogrify", "-format", "jpg", "/var/test.pgm");
+		perror("execl");
+		exit (-1);
+		return false; 
+	}
+	else if (pid_comp > 0)
+	{
+		if (waitpid (pid_comp, &status, 0) == -1)
+			return false;
+
+		else if (WIFEXITED (status))
+		{
+			if (WEXITSTATUS (status) != 0)
+				return false;
+		}
+	}
+	return true;
+}
+
+
 void verifysocket(char *buff, int searchfd, int *send_bytes)
 {
 	int bytes=0, ret=0;
@@ -81,19 +141,20 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
 			case 0:
 				while(1)
 				{
-					sleep(1);
-					lseek(searchfd, 0, SEEK_SET);
-    				read(searchfd, &str[0], 4); 
-					syslog(LOG_INFO, "str:'%s'\n", str);
+					
+					//sleep(1);
+					//lseek(searchfd, 0, SEEK_SET);
+    				//read(searchfd, &str[0], 4); 
+					//syslog(LOG_INFO, "str:'%s'\n", str);
     				
-    				if((strncasecmp(str, "done", 4)) == 0) 
-    				{
-						syslog(LOG_INFO, "done\n");
-    					str[4] = '\n';
-    					cmd_index=1;
-						*send_bytes = 5;
-    					break;
-    				}
+    				//if((strncasecmp(str, "done", 4)) == 0) 
+    				//{
+					//	syslog(LOG_INFO, "done\n");
+    				//	str[4] = '\n';
+    				//	cmd_index=1;
+					//	*send_bytes = 5;
+    				//	break;
+    				//}
 				}
 			break;
 			
