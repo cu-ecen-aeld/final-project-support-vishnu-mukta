@@ -24,6 +24,8 @@
 #include <sys/queue.h>
 #include <pthread.h>
 #include <sys/time.h>
+#include <sys/wait.h>
+#include <stdarg.h>
 
 // macro definition 
 #define TOTAL_MSG	3	
@@ -79,7 +81,7 @@ bool do_exec()
 	}	
 	else if (pid == 0) 
 	{
-		execl("/usr/bin/capture", "/usr/bin/capture");
+		execl("/usr/bin/capture", "/usr/bin/capture", (char *)NULL);
 		perror("execl");
 		exit (-1);
 		return false; 
@@ -105,7 +107,7 @@ bool do_exec()
 	}	
 	else if (pid_comp == 0) 
 	{
-		execl("/usr/bin/mogrify", "/usr/bin/mogrify", "-format", "jpg", "/var/test.pgm");
+		execl("/usr/bin/mogrify", "/usr/bin/mogrify", "-format", "jpg", "/var/test.pgm", (char *)NULL);
 		perror("execl");
 		exit (-1);
 		return false; 
@@ -141,6 +143,17 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
 			case 0:
 				while(1)
 				{
+					if(do_exec() == true)
+					{
+						str[0] = 'd';
+						str[1] = 'o';
+						str[2] = 'n';
+						str[3] = 'e';
+						str[4] = '\n';
+						syslog(LOG_INFO, "done\n");
+    					cmd_index=1;
+						*send_bytes = 5;
+					}
 					
 					//sleep(1);
 					//lseek(searchfd, 0, SEEK_SET);
