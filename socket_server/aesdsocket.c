@@ -143,19 +143,8 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
 		switch(cmd_index)
 		{
 			case 0:
-				while(1)
-				{
-					if(do_exec() == true)
-					{
-						str[0] = 'd';
-						str[1] = 'o';
-						str[2] = 'n';
-						str[3] = 'e';
-						str[4] = '\n';
-						syslog(LOG_INFO, "done\n");
-    					cmd_index=1;
-						*send_bytes = 5;
-					}
+				//while(1)
+				//{
 					
 					//sleep(1);
 					//lseek(searchfd, 0, SEEK_SET);
@@ -170,7 +159,18 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
 					//	*send_bytes = 5;
     				//	break;
     				//}
-				}
+				//}
+				if(do_exec() == true)
+					{
+						str[0] = 'd';
+						str[1] = 'o';
+						str[2] = 'n';
+						str[3] = 'e';
+						str[4] = '\n';
+						syslog(LOG_INFO, "done\n");
+    					cmd_index=1;
+						*send_bytes = 5;
+					}
 			break;
 			
 			case 1:
