@@ -134,6 +134,8 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
 	
     syslog(LOG_DEBUG, "buff: %s\n", buff);
     syslog(LOG_DEBUG, "cmd_index: %d\n", cmd_index);
+    
+    memset(&str[0], 0, (320*240));
 	
 	if((strncasecmp(buff, &cmd_table[cmd_index][0], cmd_size[cmd_index])) == 0)
 	{
@@ -328,7 +330,7 @@ void packetRWthread(func_data *func_args)
     syslog(LOG_DEBUG, "req_size: %d\n", req_size);
     syslog(LOG_DEBUG, "str buffer: %s\n", str);
     
-	nbytes = send(func_args->acceptedfd, str, req_size, 0);
+	nbytes = send(func_args->acceptedfd, &str[0], req_size, 0);
 	if(nbytes != req_size)
 	{
 		syslog(LOG_ERR, "send failed");
@@ -359,7 +361,7 @@ int main(int argc, char* argv[])
 	int acceptedfd;
 	int fd; 
     socklen_t len;
-    int ret = 0;
+    int ret = 0, i = 0;
     func_data funcdata;
     
     
@@ -473,33 +475,41 @@ int main(int argc, char* argv[])
 		exit_on_error = true;
 		goto EXITING;
 	}
-    len = sizeof(struct sockaddr);
-		
-	//accept connection
-	acceptedfd = accept(sockfd, (struct sockaddr *) &saddr, &len);
-			
-	if (acceptedfd == -1)
-	{
-		syslog(LOG_ERR, "socket accepting failed\n");
-		exit_on_error = true;
-		goto EXITING;
-	}
-	syslog(LOG_DEBUG, "Accepted connection from '%s'\n", inet_ntoa((struct in_addr)saddr.sin_addr));
 		
     while(exit_on_signal==0) 
-    {		
+    {
+		if(exit_on_signal || exit_on_error)
+			break;
+			
+		len = sizeof(struct sockaddr);
+			
+		//accept connection
+		acceptedfd = accept(sockfd, (struct sockaddr *) &saddr, &len);
+				
+		if (acceptedfd == -1)
+		{
+			syslog(LOG_ERR, "socket accepting failed\n");
+			exit_on_error = true;
+			goto EXITING;
+		}
+		syslog(LOG_DEBUG, "Accepted connection from '%s'\n", inet_ntoa((struct in_addr)saddr.sin_addr));
+			
 		funcdata.fd = fd;
 		funcdata.acceptedfd = acceptedfd;
 		funcdata.complete_status_flag = true;
 		
-		packetRWthread(&funcdata);
-		
-		if(exit_on_signal || exit_on_error)
-			break;
-	}
+		for(i=0; i<3; i++)
+		{
+			packetRWthread(&funcdata);
+			
+			if(exit_on_signal || exit_on_error)
+				break;
+		}
 
-	syslog(LOG_DEBUG, "Closing connection from '%s'\n", inet_ntoa((struct in_addr)saddr.sin_addr));
-    close(acceptedfd);
+		syslog(LOG_DEBUG, "Closing connection from '%s'\n", inet_ntoa((struct in_addr)saddr.sin_addr));
+		close(acceptedfd);
+    
+    }
 
 EXITING:
 
