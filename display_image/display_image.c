@@ -259,10 +259,10 @@ int main(int argc, char* argv[]) {
     }
     printf("Exiting...\n");
     //DeInit LCD module
-    /*if (LCD_DeInit()) {
+    if (LCD_DeInit()) {
         printf("Error in LCD_DeInit()\n");
         return 1;
-    }*/
+    }
     
     return 0;
 }
