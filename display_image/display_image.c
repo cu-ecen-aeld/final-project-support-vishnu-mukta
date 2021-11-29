@@ -60,6 +60,23 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
+    //Init LCD module
+    if (LCD_Init()) {
+        printf("Error in LCD_Init()\n");
+        return 1;
+    }
+
+    //Init LCD module
+    if (LCD_SetOrientation()) {
+        printf("Error in LCD_SendOrientation()\n");
+        return 1;
+    }
+
+    //Init LCD module
+    if (LCD_SetBorders(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1)) {
+        printf("Error in LCD_SetBorders()\n");
+        return 1;
+    }
 
 
     while (1) {
@@ -212,23 +229,6 @@ int main(int argc, char* argv[]) {
 
         //printf("Entering program...\n");
     
-        //Init LCD module
-        if (LCD_Init()) {
-            printf("Error in LCD_Init()\n");
-            return 1;
-        }
-
-        //Init LCD module
-        if (LCD_SetOrientation()) {
-            printf("Error in LCD_SendOrientation()\n");
-            return 1;
-        }
-
-        //Init LCD module
-        if (LCD_SetBorders(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1)) {
-            printf("Error in LCD_SetBorders()\n");
-            return 1;
-        }
         
 
 
