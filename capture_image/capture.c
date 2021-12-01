@@ -11,6 +11,8 @@
  *
  *      This program is provided with the V4L2 API
  * see http://linuxtv.org/docs.php for more information
+ *
+ * Modified By: Mukta Darekar
  */
 
 #include <stdio.h>
@@ -34,11 +36,14 @@
 #include <time.h>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
-//#define COLOR_CONVERT
+#define COLOR_CONVERT_RGB		2
+#define COLOR_CONVERT_EDGE		1
+#define COLOR_CONVERT_GREY		0
 #define HRES 320
 #define VRES 240
 #define HRES_STR "320"
 #define VRES_STR "240"
+#define DIFF 127		// edge detection 
 
 // Format is used by a number of functions, so made as a file global
 static struct v4l2_format fmt;
@@ -66,6 +71,9 @@ static unsigned int     n_buffers;
 static int              out_buf;
 static int              force_format=1;
 static int              frame_count = 1;
+static char frame_type=0;
+unsigned int framecnt=0;
+unsigned char bigbuffer[(1280*960)];
 
 static void errno_exit(const char *s)
 {
@@ -85,6 +93,74 @@ static int xioctl(int fh, int request, void *arg)
 
         return r;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int in_image[HRES * VRES];
+int out_vedge[HRES * VRES];
+int out_hedge[HRES * VRES];
+
+/* Assign values of Sobel vertical mask */
+int vert_mask[3][3] = { {1, 0, -1},
+                                { 2, 0, -2},
+                                { 1, 0, -1} };
+    
+/* Assign values of Sobel horizontal mask */
+int horz_mask[3][3] = { {1, 2, 1},
+                                { 0, 0, 0},
+                                { -1, -2, -1} };
+
+
+
+static void edge_detect(void)
+{
+    int i, j;
+    int temp = 0;
+
+    /* We will be ignoring the 1 pixel border around image for edge cases */
+    for (i = 1; i < VRES-1; i++) {
+      for (j = 1; j < HRES-1; j++) {
+        
+        /* Get pixel and the neighbours and then apply onto the mask matrix */
+        // Multiplies the 3x3 matrix with a pixel and its 8 neighbours
+        temp = (bigbuffer[((i-1)*HRES) + (j-1)] * vert_mask[0][0]) +  
+            (bigbuffer[(i-1)*HRES + (j+1)] * vert_mask[0][2]) + (bigbuffer[i*HRES + (j-1)] * vert_mask[1][0]) + 
+            (bigbuffer[i*HRES + (j+1)] * vert_mask[1][2]) + 
+            (bigbuffer[(i+1)*HRES + (j-1)] * vert_mask[2][0]) +  
+            (bigbuffer[(i+1)*HRES + (j+1)] * vert_mask[2][2]);
+        
+        out_vedge[(i*HRES)+j] = temp;
+      }
+    }
+
+    /* We will be ignoring the 1 pixel border around image for edge cases */
+    for (i = 1; i < VRES-1; i++) {
+      for (j = 1; j < HRES-1; j++) {
+        
+        /* Get pixel and the neighbours and then apply onto the mask matrix */
+        // Multiplies the 3x3 matrix with a pixel and its 8 neighbours
+        temp = (bigbuffer[((i-1)*HRES) + (j-1)] * horz_mask[0][0]) + (bigbuffer[(i-1)*HRES +j] * horz_mask[0][1]) + 
+            (bigbuffer[(i-1)*HRES + (j+1)] * horz_mask[0][2]) +  
+            (bigbuffer[(i+1)*HRES + (j-1)] * horz_mask[2][0]) + (bigbuffer[(i+1)*HRES + j] * horz_mask[2][1]) + 
+            (bigbuffer[(i+1)*HRES + (j+1)] * horz_mask[2][2]);
+        
+        out_hedge[(i*HRES)+j] = temp;
+      }
+    }
+
+    //restore edge detected image in bigbuffer
+    for (i = 0; i < VRES; i++) {
+      for (j = 0; j < HRES; j++) {
+        temp = abs(out_vedge[(i*HRES)+j]) + abs(out_hedge[(i*HRES)+j]);
+        if (temp > DIFF) {
+          temp = DIFF;
+        }
+        bigbuffer[(i*HRES)+j] = (unsigned char)temp;
+      }
+    }
+}
+
 
 char ppm_header[]="P6\n#9999999999 sec 9999999999 msec \n"HRES_STR" "VRES_STR"\n255\n";
 char ppm_dumpname[]="/var/test.ppm";
@@ -216,14 +292,13 @@ void yuv2rgb(int y, int u, int v, unsigned char *r, unsigned char *g, unsigned c
 
 
 
-unsigned int framecnt=0;
-unsigned char bigbuffer[(1280*960)];
 
 static void process_image(const void *p, int size)
 {
     int i, newi;
     struct timespec frame_time;
     unsigned char *pptr = (unsigned char *)p;
+    int y_temp, y2_temp, u_temp, v_temp;
 
     // record when process was called
     clock_gettime(CLOCK_REALTIME, &frame_time);    
@@ -244,37 +319,40 @@ static void process_image(const void *p, int size)
     else if(fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV)
     {
 
-#if defined(COLOR_CONVERT)
-    int y_temp, y2_temp, u_temp;
-        printf("Dump YUYV converted to RGB size %d\n", size);
-       
-        // Pixels are YU and YV alternating, so YUYV which is 4 bytes
-        // We want RGB, so RGBRGB which is 6 bytes
-        //
-        for(i=0, newi=0; i<size; i=i+4, newi=newi+6)
-        {
-            y_temp=(int)pptr[i]; u_temp=(int)pptr[i+1]; y2_temp=(int)pptr[i+2]; v_temp=(int)pptr[i+3];
-            yuv2rgb(y_temp, u_temp, v_temp, &bigbuffer[newi], &bigbuffer[newi+1], &bigbuffer[newi+2]);
-            yuv2rgb(y2_temp, u_temp, v_temp, &bigbuffer[newi+3], &bigbuffer[newi+4], &bigbuffer[newi+5]);
+		if(frame_type == COLOR_CONVERT_RGB)
+		{
+		    printf("Dump YUYV converted to RGB size %d\n", size);
+		   
+		    // Pixels are YU and YV alternating, so YUYV which is 4 bytes
+		    // We want RGB, so RGBRGB which is 6 bytes
+		    for(i=0, newi=0; i<size; i=i+4, newi=newi+6)
+		    {
+		        y_temp=(int)pptr[i]; u_temp=(int)pptr[i+1]; y2_temp=(int)pptr[i+2]; v_temp=(int)pptr[i+3];
+		        yuv2rgb(y_temp, u_temp, v_temp, &bigbuffer[newi], &bigbuffer[newi+1], &bigbuffer[newi+2]);
+		        yuv2rgb(y2_temp, u_temp, v_temp, &bigbuffer[newi+3], &bigbuffer[newi+4], &bigbuffer[newi+5]);
+		    }
+
+		    dump_ppm(bigbuffer, ((size*6)/4), framecnt, &frame_time);
         }
-
-        dump_ppm(bigbuffer, ((size*6)/4), framecnt, &frame_time);
-#else
-        printf("Dump YUYV converted to YY size %d\n", size);
-       
-        // Pixels are YU and YV alternating, so YUYV which is 4 bytes
-        // We want Y, so YY which is 2 bytes
-        //
-        for(i=0, newi=0; i<size; i=i+4, newi=newi+2)
+		else if (frame_type == COLOR_CONVERT_GREY || frame_type == COLOR_CONVERT_EDGE)
         {
-            // Y1=first byte and Y2=third byte
-            bigbuffer[newi]=pptr[i];
-            bigbuffer[newi+1]=pptr[i+2];
-        }
-
-        dump_pgm(bigbuffer, (size/2), framecnt, &frame_time);
-#endif
-
+		    printf("Dump YUYV converted to YY size %d\n", size);
+		   
+		    // Pixels are YU and YV alternating, so YUYV which is 4 bytes
+		    // We want Y, so YY which is 2 bytes
+		    //
+		    for(i=0, newi=0; i<size; i=i+4, newi=newi+2)
+		    {
+		        // Y1=first byte and Y2=third byte
+		        bigbuffer[newi]=pptr[i];
+		        bigbuffer[newi+1]=pptr[i+2];
+		    }
+			
+			if (frame_type == COLOR_CONVERT_EDGE)
+				edge_detect();
+			
+		    dump_pgm(bigbuffer, (size/2), framecnt, &frame_time);
+		}
     }
 
     else if(fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24)
@@ -444,8 +522,8 @@ static void mainloop(void)
             {
                 if(nanosleep(&read_delay, &time_error) != 0)
                     perror("nanosleep");
-                else
-                    printf("time_error.tv_sec=%ld, time_error.tv_nsec=%ld\n", time_error.tv_sec, time_error.tv_nsec);
+                //else
+                //    printf("time_error.tv_sec=%ld, time_error.tv_nsec=%ld\n", time_error.tv_sec, time_error.tv_nsec);
 
                 count--;
                 break;
@@ -492,7 +570,7 @@ static void start_capturing(void)
         case IO_METHOD_MMAP:
                 for (i = 0; i < n_buffers; ++i) 
                 {
-                        printf("allocated buffer %d\n", i);
+                        //printf("allocated buffer %d\n", i);
                         struct v4l2_buffer buf;
 
                         CLEAR(buf);
@@ -864,11 +942,13 @@ static void usage(FILE *fp, int argc, char **argv)
                  "-o | --output        Outputs stream to stdout\n"
                  "-f | --format        Force format to 640x480 GREY\n"
                  "-c | --count         Number of frames to grab [%i]\n"
+				 "-p | --picture       RGB Picture capture\n"
+				 "-e | --edge          Edge detection enabled\n"
                  "",
                  argv[0], dev_name, frame_count);
 }
 
-static const char short_options[] = "d:hmruofc:";
+static const char short_options[] = "d:hmruofc:pe";
 
 static const struct option
 long_options[] = {
@@ -880,6 +960,8 @@ long_options[] = {
         { "output", no_argument,       NULL, 'o' },
         { "format", no_argument,       NULL, 'f' },
         { "count",  required_argument, NULL, 'c' },
+        { "picture", no_argument,      NULL, 'p' },
+        { "edge",   no_argument,       NULL, 'e' },
         { 0, 0, 0, 0 }
 };
 
@@ -889,6 +971,8 @@ int main(int argc, char **argv)
         dev_name = argv[1];
     else
         dev_name = "/dev/video0";
+        
+    frame_type = COLOR_CONVERT_GREY; 
 
     for (;;)
     {
@@ -940,6 +1024,16 @@ int main(int argc, char **argv)
                 if (errno)
                         errno_exit(optarg);
                 break;
+
+			case 'p':
+				frame_type = COLOR_CONVERT_RGB; 
+				printf("\nImage segmentation feature is ON.\n\n");
+				break;
+			
+			case 'e':
+				frame_type = COLOR_CONVERT_EDGE; 
+				printf("\nEdge Detection feature is ON.\n\n");
+				break;
 
             default:
                 usage(stderr, argc, argv);

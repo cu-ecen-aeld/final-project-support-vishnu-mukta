@@ -28,13 +28,24 @@
 #include <stdarg.h>
 
 // macro definition 
-#define TOTAL_MSG	3	
-#define ERROR		1
-#define SUCCESS		0
-#define MYPORT		9000
-#define DEF_FILEPATH	"/var/socketdata"
-#define IMG_FILEPATH	"/var/test.pgm"
-#define BUFFER_LEN	200
+#define TOTAL_MSG			3	
+#define ERROR				1
+#define SUCCESS				0
+#define MYPORT				9000
+#define DEF_FILEPATH		"/var/socketdata"
+#define PGM_IMG_FILEPATH	"/var/test.pgm"
+#define PPM_IMG_FILEPATH	"/var/test.ppm"
+#define JPG_IMG_FILEPATH	"/var/test.jpg"
+#define BUFFER_LEN			200
+#define IMAGE_BUFFER_LEN	(320*240*3)
+
+
+#define CAPTURE_RGB_JPG		0
+#define CAPTURE_EDGE_JPG	1
+#define CAPTURE_JPG			2
+#define CAPTURE_RGB			3
+#define CAPTURE_EDGE		4
+#define CAPTURE				5
 
 typedef struct
 {
@@ -64,10 +75,7 @@ static void signal_handler(int signo)
 uint8_t cmd_index=0;
 char *str = NULL;
 
-char cmd_table[3][12] = { "capture\n", "get bytes\n", "send image\n"};
-char cmd_size[3] = { 7, 9, 10};
-
-bool do_exec()
+bool do_exec(int image)
 {
 	int status;
 	pid_t pid, pid_comp;
@@ -81,7 +89,12 @@ bool do_exec()
 	}	
 	else if (pid == 0) 
 	{
-		execl("/usr/bin/capture", "/usr/bin/capture", (char *)NULL);
+		if(image == CAPTURE_RGB_JPG || image == CAPTURE_RGB)
+			execl("/usr/bin/capture", "/usr/bin/capture", "-p", (char *)NULL);
+		else if(image == CAPTURE_EDGE_JPG || image == CAPTURE_EDGE)
+			execl("/usr/bin/capture", "/usr/bin/capture", "-e", (char *)NULL);
+		else
+			execl("/usr/bin/capture", "/usr/bin/capture", (char *)NULL);
 		perror("execl");
 		exit (-1);
 		return false; 
@@ -107,7 +120,10 @@ bool do_exec()
 	}	
 	else if (pid_comp == 0) 
 	{
-		execl("/usr/bin/mogrify", "/usr/bin/mogrify", "-format", "jpg", "/var/test.pgm", (char *)NULL);
+		if(image == CAPTURE_RGB_JPG || image == CAPTURE_RGB)
+			execl("/usr/bin/mogrify", "/usr/bin/mogrify", "-format", "jpg", "/var/test.ppm", (char *)NULL);
+		else
+			execl("/usr/bin/mogrify", "/usr/bin/mogrify", "-format", "jpg", "/var/test.pgm", (char *)NULL);
 		perror("execl");
 		exit (-1);
 		return false; 
@@ -127,15 +143,23 @@ bool do_exec()
 }
 
 
+
+char img_table[6][18] = { "capture rgb jpg\n", "capture edge jpg\n", "capture jpg\n", "capture rgb\n", "capture edge\n", "capture\n"};
+char img_size[6] = { 15, 16, 11, 11, 12, 7};
+char cmd_table[3][12] = { "capture\n", "get bytes\n", "send image\n"};
+char cmd_size[3] = { 7, 9, 10};
+
 void verifysocket(char *buff, int searchfd, int *send_bytes)
 {
 	int bytes=0, ret=0;
 	int img_fd;
+	static int image_type=0;
+	int i=0;
 	
     syslog(LOG_DEBUG, "buff: %s\n", buff);
     syslog(LOG_DEBUG, "cmd_index: %d\n", cmd_index);
     
-    memset(&str[0], 0, (320*240));
+    memset(&str[0], 0, IMAGE_BUFFER_LEN);
 	
 	if((strncasecmp(buff, &cmd_table[cmd_index][0], cmd_size[cmd_index])) == 0)
 	{
@@ -143,42 +167,40 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
 		switch(cmd_index)
 		{
 			case 0:
-				//while(1)
-				//{
-					
-					//sleep(1);
-					//lseek(searchfd, 0, SEEK_SET);
-    				//read(searchfd, &str[0], 4); 
-					//syslog(LOG_INFO, "str:'%s'\n", str);
-    				
-    				//if((strncasecmp(str, "done", 4)) == 0) 
-    				//{
-					//	syslog(LOG_INFO, "done\n");
-    				//	str[4] = '\n';
-    				//	cmd_index=1;
-					//	*send_bytes = 5;
-    				//	break;
-    				//}
-				//}
-				if(do_exec() == true)
+				for (i=0; i<6; i++)
+				{
+					if((strncasecmp(buff, &img_table[i][0], img_size[i])) == 0)
 					{
-						str[0] = 'd';
-						str[1] = 'o';
-						str[2] = 'n';
-						str[3] = 'e';
-						str[4] = '\n';
-						syslog(LOG_INFO, "done\n");
-    					cmd_index=1;
-						*send_bytes = 5;
+						image_type = i;
+						break;
 					}
+				}
+					
+				if(do_exec(image_type) == true)
+				{
+					str[0] = 'd';
+					str[1] = 'o';
+					str[2] = 'n';
+					str[3] = 'e';
+					str[4] = '\n';
+					syslog(LOG_INFO, "done\n");
+					cmd_index=1;
+					*send_bytes = 5;
+				}
 			break;
 			
 			case 1:
-				//open jpg file
-				img_fd = open(IMG_FILEPATH, O_RDONLY, 0764);
+				//open image file
+				if(image_type == CAPTURE_RGB)
+					img_fd = open(PPM_IMG_FILEPATH, O_RDONLY, 0764);
+				else if(image_type == CAPTURE_RGB_JPG || image_type == CAPTURE_EDGE_JPG || image_type == CAPTURE_JPG)			
+					img_fd = open(JPG_IMG_FILEPATH, O_RDONLY, 0764);
+				else			
+					img_fd = open(PGM_IMG_FILEPATH, O_RDONLY, 0764);
+				
 				if (img_fd == -1)	
 				{//if error
-					syslog(LOG_ERR, "can't open or create file '%s'\n", IMG_FILEPATH);
+					syslog(LOG_ERR, "can't open or create image file \n");
 					exit_on_signal = true;
 					cmd_index=0;
 					break;
@@ -199,11 +221,17 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
 			break;
 			
 			case 2:
-				//open jpg file
-				img_fd = open(IMG_FILEPATH, O_RDONLY, 0764);
+				//open image file
+				if(image_type == CAPTURE_RGB)
+					img_fd = open(PPM_IMG_FILEPATH, O_RDONLY, 0764);
+				else if(image_type == CAPTURE_RGB_JPG || image_type == CAPTURE_EDGE_JPG || image_type == CAPTURE_JPG)			
+					img_fd = open(JPG_IMG_FILEPATH, O_RDONLY, 0764);
+				else			
+					img_fd = open(PGM_IMG_FILEPATH, O_RDONLY, 0764);
+					
 				if (img_fd == -1)	
 				{//if error
-					syslog(LOG_ERR, "can't open or create file '%s'\n", IMG_FILEPATH);
+					syslog(LOG_ERR, "can't open or create image file \n");
 					exit_on_signal = true;
 					cmd_index=0;
 					break;
@@ -365,7 +393,7 @@ int main(int argc, char* argv[])
     func_data funcdata;
     
     
-	str = (char*)malloc(320*240);
+	str = (char*)malloc(IMAGE_BUFFER_LEN);
             
 	syslog(LOG_INFO, "aesdsocket code started\n");
 	
