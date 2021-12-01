@@ -61,7 +61,7 @@ struct buffer
         size_t  length;
 };
 
-static char            *dev_name;
+static char *dev_name="/dev/video0";			// default name given to the video device
 //static enum io_method   io = IO_METHOD_USERPTR;
 //static enum io_method   io = IO_METHOD_READ;
 static enum io_method   io = IO_METHOD_MMAP;
@@ -966,12 +966,7 @@ long_options[] = {
 };
 
 int main(int argc, char **argv)
-{
-    if(argc > 1)
-        dev_name = argv[1];
-    else
-        dev_name = "/dev/video0";
-        
+{        
     frame_type = COLOR_CONVERT_GREY; 
 
     for (;;)
@@ -988,6 +983,7 @@ int main(int argc, char **argv)
         switch (c)
         {
             case 0: /* getopt_long() flag */
+				printf("\Greyscale image capture feature is ON.\n\n");            	
                 break;
 
             case 'd':
@@ -1027,7 +1023,7 @@ int main(int argc, char **argv)
 
 			case 'p':
 				frame_type = COLOR_CONVERT_RGB; 
-				printf("\nImage segmentation feature is ON.\n\n");
+				printf("\nColor image capture feature is ON.\n\n");
 				break;
 			
 			case 'e':
