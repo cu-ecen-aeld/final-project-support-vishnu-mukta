@@ -73,6 +73,7 @@ int LCD_SetBorders(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 int LCD_SetAddress(uint16_t x, uint16_t y);
 int LCD_WritePixel(uint16_t color);
 int LCD_WritePGMPixel(uint16_t x, uint16_t y, uint8_t color);
+int LCD_WritePPMPixel(uint16_t x, uint16_t y, uint8_t* color);
 int LCD_DeInit(void);
 
 #endif // __LCD_H

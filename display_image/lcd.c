@@ -884,6 +884,24 @@ int LCD_WritePGMPixel(uint16_t x, uint16_t y, uint8_t color) {
 }
 
 
+int LCD_WritePPMPixel(uint16_t x, uint16_t y, uint8_t* color) {
+    uint16_t pix_color = 0;
+    pix_color |= ((color[2] >> 3) & BLUE_MASK) << BLUE_SHIFT;
+    pix_color |= ((color[1] >> 2) & GREEN_MASK) << GREEN_SHIFT;
+    pix_color |= ((color[0] >> 3) & RED_MASK) << RED_SHIFT;
+
+//    printf("X address: %d, Y address: %d\n", x, y);
+//    printf("0x%04X\n", pix_color);
+//    printf("%d\n", ((pix_color << BLUE_SHIFT) & BLUE_MASK) >> BLUE_SHIFT);
+//    printf("%d\n", ((pix_color << BLUE_SHIFT) & BLUE_MASK) >> BLUE_SHIFT);
+//    printf("%d\n\n", ((pix_color << BLUE_SHIFT) & BLUE_MASK) >> BLUE_SHIFT);
+
+    LCD_SetAddress(x, y);
+    LCD_WritePixel(pix_color);
+    return 1;
+}
+
+
 int LCD_DeInit(void) {
     if (SPI0_DeInit()) {
         printf("Error in SPI0_DeInit()\n");
