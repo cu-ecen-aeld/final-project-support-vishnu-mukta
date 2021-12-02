@@ -37,7 +37,7 @@
 #define PPM_IMG_FILEPATH	"/var/test.ppm"
 #define JPG_IMG_FILEPATH	"/var/test.jpg"
 #define BUFFER_LEN			200
-#define IMAGE_BUFFER_LEN	(320*240*3)
+#define IMAGE_BUFFER_LEN	((320*240*3)+100)
 
 
 #define CAPTURE_RGB_JPG		0
@@ -73,7 +73,7 @@ static void signal_handler(int signo)
 }
 
 uint8_t cmd_index=0;
-char *str = NULL;
+char str[IMAGE_BUFFER_LEN] = {0};
 
 bool do_exec(int image)
 {
@@ -160,8 +160,8 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
     syslog(LOG_DEBUG, "cmd_index: %d\n", cmd_index);
     
     memset(&str[0], 0, IMAGE_BUFFER_LEN);
-	
-	if((strncasecmp(buff, &cmd_table[cmd_index][0], cmd_size[cmd_index])) == 0)
+	syslog(LOG_DEBUG, "memset");
+	if((strncasecmp(&buff[0], &cmd_table[cmd_index][0], cmd_size[cmd_index])) == 0)
 	{
     	syslog(LOG_DEBUG, "compare successful\n");
 		switch(cmd_index)
@@ -240,7 +240,6 @@ void verifysocket(char *buff, int searchfd, int *send_bytes)
     			syslog(LOG_DEBUG, "image size: 0x%x\n", bytes);
 				
 				lseek(img_fd, 0, SEEK_SET);
-    			str = (char*)malloc(bytes+1);
     			
     			ret = read(img_fd, &str[0], bytes); 
     			if(ret != bytes)
@@ -356,7 +355,7 @@ void packetRWthread(func_data *func_args)
     verifysocket(buffer, func_args->fd, &req_size);
     
     syslog(LOG_DEBUG, "req_size: %d\n", req_size);
-    syslog(LOG_DEBUG, "str buffer: %s\n", str);
+    syslog(LOG_DEBUG, "str buffer: %s\n", &str[0]);
     
 	nbytes = send(func_args->acceptedfd, &str[0], req_size, 0);
 	if(nbytes != req_size)
@@ -391,10 +390,7 @@ int main(int argc, char* argv[])
     socklen_t len;
     int ret = 0, i = 0;
     func_data funcdata;
-    
-    
-	str = (char*)malloc(IMAGE_BUFFER_LEN);
-            
+                
 	syslog(LOG_INFO, "aesdsocket code started\n");
 	
 	// check if deamon needs to be started
@@ -549,9 +545,6 @@ EXITING:
 	//if(acceptedfd)
 	//	close(acceptedfd);
 	
-	if(str != NULL)
-		free(str);
-
 	if(sockfd)
 		close(sockfd);
 
