@@ -8,6 +8,7 @@
 #include <linux/spi/spidev.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <syslog.h>
 #include "gpio.h"
 
 static int cs_fd;
@@ -32,7 +33,7 @@ int GPIO_Init(void) {
     }
 
     close(exp_fd);
-    //printf("Exported GPIO25\n");
+    syslog(LOG_INFO, "Exported GPIO25\n");
 
     //enable DC
     exp_fd = open(GPIO_EXPORT_PATH, O_WRONLY);
@@ -48,7 +49,7 @@ int GPIO_Init(void) {
     }
 
     close(exp_fd);
-    //printf("Exported GPIO24\n");
+    syslog(LOG_INFO, "Exported GPIO24\n");
 
     //enable RST
     exp_fd = open(GPIO_EXPORT_PATH, O_WRONLY);
@@ -64,7 +65,7 @@ int GPIO_Init(void) {
     }
 
     close(exp_fd);
-    //printf("Exported GPIO23\n");
+    syslog(LOG_INFO, "Exported GPIO23\n");
 
     //set gpio25 to output
     dir_fd = open(CS_GPIO_PIN_DIR_PATH, O_WRONLY);
@@ -80,7 +81,7 @@ int GPIO_Init(void) {
     }
 
     close(dir_fd);
-    //printf("Set GPIO25 as output\n");
+    syslog(LOG_INFO, "Set GPIO25 as output\n");
 
     //set gpio24 to output
     dir_fd = open(DC_GPIO_PIN_DIR_PATH, O_WRONLY);
@@ -96,7 +97,7 @@ int GPIO_Init(void) {
     }
 
     close(dir_fd);
-    //printf("Set GPIO24 as output\n");
+    syslog(LOG_INFO, "Set GPIO24 as output\n");
 
     //set gpio23 to output
     dir_fd = open(RST_GPIO_PIN_DIR_PATH, O_WRONLY);
@@ -112,7 +113,7 @@ int GPIO_Init(void) {
     }
 
     close(dir_fd);
-    //printf("Set GPIO23 as output\n");
+    syslog(LOG_INFO, "Set GPIO23 as output\n");
 
     //open gpio ports
     cs_fd = open(CS_GPIO_PIN_VAL_PATH, O_WRONLY);
@@ -135,22 +136,22 @@ int GPIO_Init(void) {
 
     sys_status = write(cs_fd, "1", 1);
     if (sys_status != 1) {
-        printf("Did not write output 0\n");
+        syslog(LOG_ERR, "Did not write output 0\n");
     }
 
     sys_status = write(dc_fd, "1", 1);
     if (sys_status != 1) {
-        printf("Did not write output 0\n");
+        syslog(LOG_ERR, "Did not write output 0\n");
     }
 
     sys_status = write(rst_fd, "1", 1);
     if (sys_status != 1) {
-        printf("Did not write output 0\n");
+        syslog(LOG_ERR, "Did not write output 0\n");
     }
 
-    //printf("Opened CS\n");
-    //printf("Opened DC\n");
-    //printf("Opened RST\n");
+    syslog(LOG_INFO, "Opened CS\n");
+    syslog(LOG_INFO, "Opened DC\n");
+    syslog(LOG_INFO, "Opened RST\n");
 
     return 0;
 }
@@ -161,14 +162,14 @@ int CS_Ctrl(int level) {
     if (level == 0) {
         sys_status = write(cs_fd, "0", 1);
         if (sys_status != 1) {
-            printf("Did not write output 0\n");
+            syslog(LOG_ERR, "Did not write output 0\n");
             return 1;
         }
     }
     else if (level == 1) {
         sys_status = write(cs_fd, "1", 1);
         if (sys_status != 1) {
-            printf("Did not write output 1\n");
+            syslog(LOG_ERR, "Did not write output 1\n");
             return 1;
         }
     }
@@ -182,14 +183,14 @@ int DC_Ctrl(int level) {
     if (level == 0) {
         sys_status = write(dc_fd, "0", 1);
         if (sys_status != 1) {
-            printf("Did not write output 0\n");
+            syslog(LOG_ERR, "Did not write output 0\n");
             return 1;
         }
     }
     else if (level == 1) {
         sys_status = write(dc_fd, "1", 1);
         if (sys_status != 1) {
-            printf("Did not write output 1\n");
+            syslog(LOG_ERR, "Did not write output 1\n");
             return 1;
         }
     }
@@ -203,14 +204,14 @@ int RST_Ctrl(int level) {
     if (level == 0) {
         sys_status = write(rst_fd, "0", 1);
         if (sys_status != 1) {
-            printf("Did not write output 0\n");
+            syslog(LOG_ERR, "Did not write output 0\n");
             return 1;
         }
     }
     else if (level == 1) {
         sys_status = write(rst_fd, "1", 1);
         if (sys_status != 1) {
-            printf("Did not write output 1\n");
+            syslog(LOG_ERR, "Did not write output 1\n");
             return 1;
         }
     }
@@ -256,7 +257,7 @@ int GPIO_DeInit(void) {
     }
 
     close(unexp_fd);
-    //printf("Unexported GPIO25\n");
+    syslog(LOG_INFO, "Unexported GPIO25\n");
 
     //deinit gpio24
     unexp_fd = open(GPIO_UNEXPORT_PATH, O_WRONLY);
@@ -272,7 +273,7 @@ int GPIO_DeInit(void) {
     }
 
     close(unexp_fd);
-    //printf("Unexported GPIO24\n");
+    syslog(LOG_INFO, "Unexported GPIO24\n");
 
     //deinit gpio23
     unexp_fd = open(GPIO_UNEXPORT_PATH, O_WRONLY);
@@ -288,7 +289,7 @@ int GPIO_DeInit(void) {
     }
 
     close(unexp_fd);
-    //printf("Unexported GPIO23\n");
+    syslog(LOG_INFO, "Unexported GPIO23\n");
 
     return 0;
 }

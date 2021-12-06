@@ -7,6 +7,7 @@
 #include <linux/spi/spidev.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <syslog.h>
 #include "spi.h"
 
 static int spi_fd;
@@ -24,7 +25,7 @@ int SPI0_Init(void) {
         return 1;
     }
 
-    //printf("Opened spidev0.0\n");
+    syslog(LOG_INFO, "Opened spidev0.0\n");
 
     sys_status = ioctl(spi_fd, SPI_IOC_WR_MODE, &mode);
     if (sys_status < 0) {
@@ -32,7 +33,7 @@ int SPI0_Init(void) {
         return 1;
     }
 
-    //printf("WR mode set\n");
+    syslog(LOG_INFO, "WR mode set\n");
 
     sys_status = ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
     if (sys_status < 0) {
@@ -40,7 +41,7 @@ int SPI0_Init(void) {
         return 1;
     }
 
-    //printf("WR bits per word set\n");
+    syslog(LOG_INFO, "WR bits per word set\n");
 
     sys_status = ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
     if (sys_status < 0) {
@@ -48,7 +49,7 @@ int SPI0_Init(void) {
         return 1;
     }
 
-    //printf("WR speed set\n");
+    syslog(LOG_INFO, "WR speed set\n");
 
     return 0;
 }
@@ -63,7 +64,7 @@ int SPI0_Write(uint8_t* w_buff, uint8_t w_buff_len) {
         return -1;
     }
     else if (bytes_written != w_buff_len) {
-        printf("Did not write full buffer\n");
+        syslog(LOG_ERR, "Did not write full buffer\n");
     }
 
     return bytes_written;
@@ -79,7 +80,7 @@ int SPI0_DeInit(void) {
         return 1;
     }
 
-    printf("Closed spidev0.0\n");
+    syslog(LOG_INFO, "Closed spidev0.0\n");
 
     return 0;
 }

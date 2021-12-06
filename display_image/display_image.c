@@ -21,27 +21,24 @@
 #include "gpio.h"
 #include "lcd.h"
 
-#define PGM_BYTES_CHUNK     (256)
+#define IMAGE_BYTES_CHUNK     (256)
 #define PGM_SIZE            (76800)
 #define PPM_SIZE			(76800 * 3)
 
-uint8_t pgm_buff[PGM_BYTES_CHUNK] = { 0 };
+uint8_t pgm_buff[IMAGE_BYTES_CHUNK] = { 0 };
 
 
 int main(int argc, char* argv[]) {
     
-    int socket_fd, test_pgm_fd;
+    int socket_fd, image_fd;
     struct addrinfo hints;
     struct addrinfo* res;
-    int send_bytes = 0, recv_bytes = 0, pgm_write_bytes;
+    int send_bytes = 0, recv_bytes = 0, image_write_bytes;
     uint8_t recv_buff[15] = { 0 };
     uint8_t stdin_buff[20] = { 0 };
     uint8_t stdin_buff_len = 0;
-    uint32_t pgm_len = 0;
-    //uint8_t* pgm_buff;
-    uint32_t pgm_bytes_recvd = 0, pgm_bytes_to_recv = 0;
-    //pid_t pid;
-    //int status, exit_status;
+    uint32_t image_len = 0;
+    uint32_t image_bytes_recvd = 0, image_bytes_to_recv = 0;
     uint8_t color_buff[3];
     int i, j;
     int image_type=0;
@@ -90,16 +87,16 @@ int main(int argc, char* argv[]) {
         printf("5. <capture rgb>      : to capture and send color image\n");
         printf("6. <capture rgb jpg>  : to capture and send color compressed image\n");
         printf("7. <exit>             : to exit the program\n");
+
         stdin_buff_len = read(STDIN_FILENO, &stdin_buff[0], 20);
         if (stdin_buff_len < 0) {
             syslog(LOG_ERR, "read");
             perror("read");
             exit(-1);
         }
-        printf("stdin_buff: %s", (char *)stdin_buff);
-        printf("stdin_buff_len: %d\n", stdin_buff_len);
 
-        pgm_bytes_recvd = 0;
+
+        image_bytes_recvd = 0;
 
 
         if (!strncmp("exit\n", (char *)stdin_buff, stdin_buff_len)) {
@@ -108,27 +105,21 @@ int main(int argc, char* argv[]) {
         }
         else if (strncmp("capture\n", (char *)stdin_buff, stdin_buff_len) == 0) {
         	image_type=0;
-            //continue;
         }
         else if (strncmp("capture jpg\n", (char *)stdin_buff, stdin_buff_len) == 0) {
         	image_type=1;
-            //continue;
         }
         else if (strncmp("capture edge\n", (char *)stdin_buff, stdin_buff_len) == 0) {
         	image_type=0;
-            //continue;
         }
         else if (strncmp("capture edge jpg\n", (char *)stdin_buff, stdin_buff_len) == 0) {
         	image_type=1;
-            //continue;
         }
         else if (strncmp("capture rgb\n", (char *)stdin_buff, stdin_buff_len) == 0) {
         	image_type=2;
-            //continue;
         }
         else if (strncmp("capture rgb jpg\n", (char *)stdin_buff, stdin_buff_len) == 0) {
         	image_type=1;
-            //continue;
         }
         else
         	continue;
@@ -145,7 +136,6 @@ int main(int argc, char* argv[]) {
             perror("connect");
             exit(-1);
         }
-        //printf("Connected!\n");
 
         send_bytes = send(socket_fd, &stdin_buff[0], stdin_buff_len, 0);
         if (send_bytes < 0) {
@@ -154,17 +144,12 @@ int main(int argc, char* argv[]) {
             exit(-1);
         }
 
-        //printf("Bytes sent: %d\n", send_bytes);
-
         recv_bytes = recv(socket_fd, &recv_buff[0], 5, 0);
         if (recv_bytes < 0) {
             syslog(LOG_ERR, "recv");
             perror("recv");
             exit(-1);
         }
-
-        //printf("Bytes recvd: %d\n", recv_bytes);
-        //printf("Message received from socket server: %s\n", (char *)recv_buff);
 
         send_bytes = send(socket_fd, "get bytes\n", 10, 0);
         if (send_bytes < 0) {
@@ -173,8 +158,6 @@ int main(int argc, char* argv[]) {
             exit(-1);
         }
 
-        //printf("Bytes sent: %d\n", send_bytes);
-
         recv_bytes = recv(socket_fd, &recv_buff[0], sizeof(uint32_t), 0);
         if (recv_bytes < 0) {
             syslog(LOG_ERR, "recv");
@@ -182,12 +165,8 @@ int main(int argc, char* argv[]) {
             exit(-1);
         }
 
-        //printf("Bytes recvd: %d\n", recv_bytes);
-        pgm_len = *((uint32_t *)(&recv_buff[0]));
-        pgm_len = ntohl(pgm_len);
-
-        //printf("pgm_len: %d\n", pgm_len);
-
+        image_len = *((uint32_t *)(&recv_buff[0]));
+        image_len = ntohl(image_len);
 
         send_bytes = send(socket_fd, "send image\n", 11, 0);
         if (send_bytes < 0) {
@@ -197,107 +176,62 @@ int main(int argc, char* argv[]) {
         }
 
 		if(image_type==2)
-        	test_pgm_fd = open("/root/pgm_image.ppm", O_CREAT | O_RDWR | O_TRUNC, 0774);
+        	image_fd = open("/root/image.ppm", O_CREAT | O_RDWR | O_TRUNC, 0774);
 		else if(image_type==1)
-        	test_pgm_fd = open("/root/pgm_image.jpg", O_CREAT | O_RDWR | O_TRUNC, 0774);
+        	image_fd = open("/root/image.jpg", O_CREAT | O_RDWR | O_TRUNC, 0774);
 		else if(image_type==0)
-        	test_pgm_fd = open("/root/pgm_image.pgm", O_CREAT | O_RDWR | O_TRUNC, 0774);
+        	image_fd = open("/root/image.pgm", O_CREAT | O_RDWR | O_TRUNC, 0774);
         	
-        if (test_pgm_fd < 0) {
+        if (image_fd < 0) {
             syslog(LOG_ERR, "open");
             perror("open");
             exit(-1);
         }
 
-        while (pgm_bytes_recvd < pgm_len) {
-            if (pgm_bytes_recvd + PGM_BYTES_CHUNK > pgm_len) {
-                pgm_bytes_to_recv = pgm_len - pgm_bytes_recvd;
+        while (image_bytes_recvd < image_len) {
+            if (image_bytes_recvd + IMAGE_BYTES_CHUNK > image_len) {
+                image_bytes_to_recv = image_len - image_bytes_recvd;
             }
             else {
-                pgm_bytes_to_recv = PGM_BYTES_CHUNK;
+                image_bytes_to_recv = IMAGE_BYTES_CHUNK;
             }
 
-            recv_bytes = recv(socket_fd, &pgm_buff[0], pgm_bytes_to_recv, 0);
+            recv_bytes = recv(socket_fd, &pgm_buff[0], image_bytes_to_recv, 0);
             if (recv_bytes < 0) {
                 syslog(LOG_ERR, "recv");
                 perror("recv");
                 exit(-1);
             }
 
-            pgm_write_bytes = write(test_pgm_fd, &pgm_buff[0], recv_bytes);
-            if (pgm_write_bytes < 0) {
+            image_write_bytes = write(image_fd, &pgm_buff[0], recv_bytes);
+            if (image_write_bytes < 0) {
                 syslog(LOG_ERR, "recv");
                 perror("recv");
                 exit(-1);
             }
 
-            pgm_bytes_recvd += recv_bytes;
-
-            //printf("pgm_bytes_recvd: %d\n", pgm_bytes_recvd);
-            //printf("pgm_write_bytes: %d\n", pgm_write_bytes);
+            image_bytes_recvd += recv_bytes;
         }
-
-        //printf("pgm of %d bytes length received\n", pgm_bytes_recvd);
-
-        /*close(test_pgm_fd);
-
-        pid = fork();
-        if (pid == -1) {
-            syslog(LOG_ERR, "fork");
-            perror("fork");
-            exit(-1);
-        }
-        else if (pid == 0) {
-            execl("/usr/bin/mogrify", "/usr/bin/mogrify", "-write", "../foo.pgm", "-format", "pgm", "test_pgm.pgm", (char *)NULL);
-            exit(-1);
-        }
-        else {
-            waitpid(pid, &status, 0);
-            if (WIFEXITED(status)) {
-                exit_status = WEXITSTATUS(status);
-                if (exit_status != 0) {
-                    printf("Something went wrong in execl\n");
-                    exit(-1);
-                }
-            }
-        }
-        printf("Converted image!\n");*/
-        
-
-        
-
-        //printf("Entering program...\n");
-    
-        
-
-
-        //Reading test file
-        
-        /*test_pgm_fd = open("/root/test.pgm", O_RDONLY);
-        if (test_pgm_fd < 0) {
-            perror("open");
-            exit(-1);
-        }*/
         
         if (image_type == 0) {
-        	lseek(test_pgm_fd, pgm_len - PGM_SIZE, SEEK_SET);
+        	lseek(image_fd, image_len - PGM_SIZE, SEEK_SET);
         }
         else if (image_type == 2) {
-        	lseek(test_pgm_fd, pgm_len - PPM_SIZE, SEEK_SET);
+        	lseek(image_fd, image_len - PPM_SIZE, SEEK_SET);
         }
 
         printf("Drawing pixels...\n");
         for (j = 0; j < LCD_HEIGHT; j++) {
             for (i = 0; i < LCD_WIDTH; i++) {
             	if (image_type == 0) {
-		            if ((read(test_pgm_fd, &color_buff[0], 1)) == -1) {
+		            if ((read(image_fd, &color_buff[0], 1)) == -1) {
 		                perror("read");
 		                exit(-1);
 		            }
 		            LCD_WritePGMPixel(i, j, color_buff[0]);
                 }
                 else if (image_type == 2) {
-                	if ((read(test_pgm_fd, &color_buff[0], 3)) == -1) {
+                	if ((read(image_fd, &color_buff[0], 3)) == -1) {
                 		perror("read");
                 		exit(-1);
                 	}
@@ -308,17 +242,18 @@ int main(int argc, char* argv[]) {
         
         printf("Image display successful!\n");
         
-        close(test_pgm_fd);
+        close(image_fd);
         memset(recv_buff, 0, 15);
         memset(stdin_buff, 0, 10);
         close(socket_fd);
     }
+
     printf("Exiting...\n");
     //DeInit LCD module
-    //if (LCD_DeInit()) {
-    //    printf("Error in LCD_DeInit()\n");
-    //    return 1;
-    //}
+    if (LCD_DeInit()) {
+        printf("Error in LCD_DeInit()\n");
+        return 1;
+    }
     
     return 0;
 }
