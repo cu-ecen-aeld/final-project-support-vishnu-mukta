@@ -13,15 +13,15 @@
  * see http://linuxtv.org/docs.php for more information
  *
  * Modified By: Mukta Darekar
+ * Added: Edge detection code, capturing images of different types based on arguments
+ *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
 #include <getopt.h>             /* getopt_long() */
-
 #include <fcntl.h>              /* low-level i/o */
 #include <unistd.h>
 #include <errno.h>
@@ -30,99 +30,100 @@
 #include <sys/time.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
-
 #include <linux/videodev2.h>
-
 #include <time.h>
 
-#define CLEAR(x) memset(&(x), 0, sizeof(x))
-#define COLOR_CONVERT_RGB		2
-#define COLOR_CONVERT_EDGE		1
-#define COLOR_CONVERT_GREY		0
-#define HRES 320
-#define VRES 240
-#define HRES_STR "320"
-#define VRES_STR "240"
-#define DIFF 127		// edge detection 
+#define CLEAR(x)                memset(&(x), 0, sizeof(x))
+#define COLOR_CONVERT_RGB       2
+#define COLOR_CONVERT_EDGE      1
+#define COLOR_CONVERT_GREY      0
+#define HRES                    320
+#define VRES                    240
+#define HRES_STR                "320"
+#define VRES_STR                "240"
+#define DIFF                    127		// edge detection 
 
 // Format is used by a number of functions, so made as a file global
 static struct v4l2_format fmt;
 
 enum io_method 
 {
-        IO_METHOD_READ,
-        IO_METHOD_MMAP,
-        IO_METHOD_USERPTR,
+    IO_METHOD_READ,
+    IO_METHOD_MMAP,
+    IO_METHOD_USERPTR,
 };
 
 struct buffer 
 {
-        void   *start;
-        size_t  length;
+    void   *start;
+    size_t  length;
 };
 
 static char *dev_name="/dev/video0";			// default name given to the video device
 //static enum io_method   io = IO_METHOD_USERPTR;
 //static enum io_method   io = IO_METHOD_READ;
-static enum io_method   io = IO_METHOD_MMAP;
-static int              fd = -1;
-struct buffer          *buffers;
-static unsigned int     n_buffers;
-static int              out_buf;
-static int              force_format=1;
-static int              frame_count = 1;
+static enum io_method io = IO_METHOD_MMAP;
+static int fd = -1;
+struct buffer *buffers;
+static unsigned int n_buffers;
+static int out_buf;
+static int force_format=1;
+static int frame_count = 1;
 static char frame_type=0;
 unsigned int framecnt=0;
 unsigned char bigbuffer[(1280*960)];
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 static void errno_exit(const char *s)
 {
-        fprintf(stderr, "%s error %d, %s\n", s, errno, strerror(errno));
-        exit(EXIT_FAILURE);
-}
-
-static int xioctl(int fh, int request, void *arg)
-{
-        int r;
-
-        do 
-        {
-            r = ioctl(fh, request, arg);
-
-        } while (-1 == r && EINTR == errno);
-
-        return r;
+    fprintf(stderr, "%s error %d, %s\n", s, errno, strerror(errno));
+    exit(EXIT_FAILURE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static int xioctl(int fh, int request, void *arg)
+{
+    int r;
+
+    do 
+    {
+        r = ioctl(fh, request, arg);
+
+    } while (-1 == r && EINTR == errno);
+
+    return r;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int in_image[HRES * VRES];
 int out_vedge[HRES * VRES];
 int out_hedge[HRES * VRES];
 
-/* Assign values of Sobel vertical mask */
+// Assign values of Sobel vertical mask
 int vert_mask[3][3] = { {1, 0, -1},
-                                { 2, 0, -2},
-                                { 1, 0, -1} };
+                        { 2, 0, -2},
+                        { 1, 0, -1} };
     
-/* Assign values of Sobel horizontal mask */
+// Assign values of Sobel horizontal mask
 int horz_mask[3][3] = { {1, 2, 1},
-                                { 0, 0, 0},
-                                { -1, -2, -1} };
+                        { 0, 0, 0},
+                        { -1, -2, -1} };
 
-
-
+// convert an image to edge detected image by comparing a pixel with its surrounding pixels
 static void edge_detect(void)
 {
     int i, j;
     int temp = 0;
 
-    /* We will be ignoring the 1 pixel border around image for edge cases */
-    for (i = 1; i < VRES-1; i++) {
-      for (j = 1; j < HRES-1; j++) {
-        
-        /* Get pixel and the neighbours and then apply onto the mask matrix */
+    // We will be ignoring the 1 pixel border around image for edge cases
+    for (i = 1; i < VRES-1; i++) 
+    {
+      for (j = 1; j < HRES-1; j++) 
+      {        
+        // Get pixel and the neighbours and then apply onto the mask matrix 
         // Multiplies the 3x3 matrix with a pixel and its 8 neighbours
         temp = (bigbuffer[((i-1)*HRES) + (j-1)] * vert_mask[0][0]) +  
             (bigbuffer[(i-1)*HRES + (j+1)] * vert_mask[0][2]) + (bigbuffer[i*HRES + (j-1)] * vert_mask[1][0]) + 
@@ -134,11 +135,12 @@ static void edge_detect(void)
       }
     }
 
-    /* We will be ignoring the 1 pixel border around image for edge cases */
-    for (i = 1; i < VRES-1; i++) {
-      for (j = 1; j < HRES-1; j++) {
-        
-        /* Get pixel and the neighbours and then apply onto the mask matrix */
+    // We will be ignoring the 1 pixel border around image for edge cases
+    for (i = 1; i < VRES-1; i++) 
+    {
+      for (j = 1; j < HRES-1; j++) 
+      {        
+        // Get pixel and the neighbours and then apply onto the mask matrix
         // Multiplies the 3x3 matrix with a pixel and its 8 neighbours
         temp = (bigbuffer[((i-1)*HRES) + (j-1)] * horz_mask[0][0]) + (bigbuffer[(i-1)*HRES +j] * horz_mask[0][1]) + 
             (bigbuffer[(i-1)*HRES + (j+1)] * horz_mask[0][2]) +  
@@ -150,10 +152,13 @@ static void edge_detect(void)
     }
 
     //restore edge detected image in bigbuffer
-    for (i = 0; i < VRES; i++) {
-      for (j = 0; j < HRES; j++) {
+    for (i = 0; i < VRES; i++) 
+    {
+      for (j = 0; j < HRES; j++) 
+      {
         temp = abs(out_vedge[(i*HRES)+j]) + abs(out_hedge[(i*HRES)+j]);
-        if (temp > DIFF) {
+        if (temp > DIFF) 
+        {
           temp = DIFF;
         }
         bigbuffer[(i*HRES)+j] = (unsigned char)temp;
@@ -161,10 +166,12 @@ static void edge_detect(void)
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 char ppm_header[]="P6\n#9999999999 sec 9999999999 msec \n"HRES_STR" "VRES_STR"\n255\n";
 char ppm_dumpname[]="/var/test.ppm";
 
+// dump color image to a flash
 static void dump_ppm(const void *p, int size, unsigned int tag, struct timespec *time)
 {
     int written, total, dumpfd;
@@ -195,10 +202,12 @@ static void dump_ppm(const void *p, int size, unsigned int tag, struct timespec 
     
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 char pgm_header[]="P5\n#9999999999 sec 9999999999 msec \n"HRES_STR" "VRES_STR"\n255\n";
 char pgm_dumpname[]="/var/test.pgm";
 
+// dump greyscale image to a flash
 static void dump_pgm(const void *p, int size, unsigned int tag, struct timespec *time)
 {
     int written, total, dumpfd;
@@ -229,7 +238,9 @@ static void dump_pgm(const void *p, int size, unsigned int tag, struct timespec 
     
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//yuv format to rgb conversion using floating point values
 void yuv2rgb_float(float y, float u, float v, 
                    unsigned char *r, unsigned char *g, unsigned char *b)
 {
@@ -290,9 +301,9 @@ void yuv2rgb(int y, int u, int v, unsigned char *r, unsigned char *g, unsigned c
    *b = b1 ;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
+// This function converts captured YUYV image to either RGB, edge detected or greyscale image
 static void process_image(const void *p, int size)
 {
     int i, newi;
@@ -306,10 +317,6 @@ static void process_image(const void *p, int size)
     framecnt++;
     printf("frame %d: ", framecnt);
 
-    // This just dumps the frame to a file now, but you could replace with whatever image
-    // processing you wish.
-    //
-
     if(fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_GREY)
     {
         printf("Dump graymap as-is size %d\n", size);
@@ -318,7 +325,7 @@ static void process_image(const void *p, int size)
 
     else if(fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV)
     {
-
+        //Color image capture
 		if(frame_type == COLOR_CONVERT_RGB)
 		{
 		    printf("Dump YUYV converted to RGB size %d\n", size);
@@ -334,13 +341,13 @@ static void process_image(const void *p, int size)
 
 		    dump_ppm(bigbuffer, ((size*6)/4), framecnt, &frame_time);
         }
+        //Greyscale or Edge detection capture
 		else if (frame_type == COLOR_CONVERT_GREY || frame_type == COLOR_CONVERT_EDGE)
         {
 		    printf("Dump YUYV converted to YY size %d\n", size);
 		   
 		    // Pixels are YU and YV alternating, so YUYV which is 4 bytes
 		    // We want Y, so YY which is 2 bytes
-		    //
 		    for(i=0, newi=0; i<size; i=i+4, newi=newi+2)
 		    {
 		        // Y1=first byte and Y2=third byte
@@ -348,6 +355,7 @@ static void process_image(const void *p, int size)
 		        bigbuffer[newi+1]=pptr[i+2];
 		    }
 			
+            //convert into edge detection image
 			if (frame_type == COLOR_CONVERT_EDGE)
 				edge_detect();
 			
@@ -370,7 +378,9 @@ static void process_image(const void *p, int size)
     fflush(stdout);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// this function captures frames from C270 module
 static int read_frame(void)
 {
     struct v4l2_buffer buf;
@@ -390,9 +400,7 @@ static int read_frame(void)
 
                     case EIO:
                         /* Could ignore EIO, see spec. */
-
                         /* fall through */
-
                     default:
                         errno_exit("read");
                 }
@@ -450,9 +458,7 @@ static int read_frame(void)
 
                     case EIO:
                         /* Could ignore EIO, see spec. */
-
                         /* fall through */
-
                     default:
                         errno_exit("VIDIOC_DQBUF");
                 }
@@ -476,7 +482,9 @@ static int read_frame(void)
     return 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//captures number of frames mentioned in loop
 static void mainloop(void)
 {
     unsigned int count;
@@ -537,6 +545,9 @@ static void mainloop(void)
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// instructions to camera module to stop capturing frames
 static void stop_capturing(void)
 {
         enum v4l2_buf_type type;
@@ -555,6 +566,9 @@ static void stop_capturing(void)
         }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// instructions to camera module to setup for capturing frames
 static void start_capturing(void)
 {
         unsigned int i;
@@ -607,6 +621,9 @@ static void start_capturing(void)
         }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// uninitialize the camera module
 static void uninit_device(void)
 {
         unsigned int i;
@@ -631,6 +648,9 @@ static void uninit_device(void)
         free(buffers);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// initialize buffers to read frames
 static void init_read(unsigned int buffer_size)
 {
         buffers = calloc(1, sizeof(*buffers));
@@ -651,6 +671,9 @@ static void init_read(unsigned int buffer_size)
         }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// initialization of memory mapping to capture frames
 static void init_mmap(void)
 {
         struct v4l2_requestbuffers req;
@@ -713,6 +736,7 @@ static void init_mmap(void)
         }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void init_userp(unsigned int buffer_size)
 {
         struct v4l2_requestbuffers req;
@@ -751,6 +775,9 @@ static void init_userp(unsigned int buffer_size)
         }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// initialize camera module to capture image in format V4L2_PIX_FMT_YUYV
 static void init_device(void)
 {
     struct v4l2_capability cap;
@@ -802,8 +829,6 @@ static void init_device(void)
 
 
     /* Select video input, video standard and tune here. */
-
-
     CLEAR(cropcap);
 
     cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -825,13 +850,11 @@ static void init_device(void)
                         break;
             }
         }
-
     }
     else
     {
         /* Errors ignored. */
     }
-
 
     CLEAR(fmt);
 
@@ -895,7 +918,9 @@ static void init_device(void)
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// close camera module file
 static void close_device(void)
 {
         if (-1 == close(fd))
@@ -904,6 +929,9 @@ static void close_device(void)
         fd = -1;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// open a device as a file
 static void open_device(void)
 {
         struct stat st;
@@ -928,6 +956,9 @@ static void open_device(void)
         }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Different argument options - functionality provided by this code
 static void usage(FILE *fp, int argc, char **argv)
 {
         fprintf(fp,
@@ -965,6 +996,9 @@ long_options[] = {
         { 0, 0, 0, 0 }
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//main function 
 int main(int argc, char **argv)
 {        
     frame_type = COLOR_CONVERT_GREY; 
@@ -983,7 +1017,7 @@ int main(int argc, char **argv)
         switch (c)
         {
             case 0: /* getopt_long() flag */
-				printf("\Greyscale image capture feature is ON.\n\n");            	
+				printf("\nGreyscale image capture feature is ON.\n\n");            	
                 break;
 
             case 'd':
@@ -1044,11 +1078,12 @@ int main(int argc, char **argv)
     stop_capturing();
     uninit_device();
     close_device();
-    fprintf(stderr, "\n");
+	printf("\nImage Capture successful \n");
     return 0;
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
